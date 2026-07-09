@@ -2,15 +2,27 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Prepare Forge Client",
+      "label": "Minecraft Client (:forge)",
       "command": "./gradlew",
       "type": "shell",
       "args": [
-        ":common:classes",
-        ":forge:classes",
-        ":forge:configureClientLaunch"
+        ":forge:runClient"
       ],
-      "group": "build"
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "group": "Mod Development",
+        "panel": "dedicated",
+        "reveal": "always"
+      }
     },
     {
       "label": "Prepare Fabric Client",
@@ -21,6 +33,11 @@
         ":fabric:classes",
         ":fabric:configureClientLaunch"
       ],
+      "options": {
+        "env": {
+          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+        }
+      },
       "group": "build"
     },
     {
@@ -30,6 +47,11 @@
       "args": [
         ":forge:build"
       ],
+      "options": {
+        "env": {
+          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+        }
+      },
       "group": "build"
     },
     {
@@ -39,6 +61,11 @@
       "args": [
         ":fabric:build"
       ],
+      "options": {
+        "env": {
+          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+        }
+      },
       "group": "build"
     }
   ]

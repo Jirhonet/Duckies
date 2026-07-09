@@ -1,6 +1,7 @@
 package net.jirho.duckies.client.renderer.model;
 
 import com.google.common.collect.ImmutableList;
+
 import net.jirho.duckies.common.entity.Duck;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -15,46 +16,65 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class DuckModel<T extends Duck> extends AgeableListModel<T> {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("duckies", "duck"), "main");
-    private final ModelPart head;
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
+            new ResourceLocation("duckies", "duck"), "main");
+
+    public final ModelPart head;
+    public final ModelPart heldItem;
     private final ModelPart body;
-    private final ModelPart rightpaw;
-    private final ModelPart leftpaw;
-    private final ModelPart fucku;
+    private final ModelPart feet;
+    private final ModelPart leftFoot;
+    private final ModelPart rightFoot;
 
     public DuckModel(ModelPart root) {
         this.head = root.getChild("head");
+        this.heldItem = root.getChild("held_item");
         this.body = root.getChild("body");
-        this.rightpaw = root.getChild("rightpaw");
-        this.leftpaw = root.getChild("leftpaw");
-        this.fucku = root.getChild("fucku");
+        this.feet = root.getChild("feet");
+        this.leftFoot = this.feet.getChild("left_foot");
+        this.rightFoot = this.feet.getChild("right_foot");
     }
 
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();
-        partDefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -4.0F, -2.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)).texOffs(16, 0).addBox(-2.0F, -1.0F, -4.0F, 4.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 19.0F, -3.0F));
-        partDefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 8).addBox(-2.5F, -2.0F, -3.0F, 5.0F, 4.0F, 6.0F, new CubeDeformation(0.0F)).texOffs(16, 3).addBox(-1.5F, -3.0F, 2.0F, 3.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 21.0F, 0.0F));
-        partDefinition.addOrReplaceChild("rightpaw", CubeListBuilder.create().texOffs(17, 6).addBox(-0.5F, 0.0F, 0.25F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)).texOffs(16, 6).addBox(-0.5F, 1.0F, -0.75F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(-1.5F, 23.0F, -0.25F));
-        partDefinition.addOrReplaceChild("leftpaw", CubeListBuilder.create().texOffs(17, 5).addBox(-0.5F, 0.0F, 0.25F, 1.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)).texOffs(16, 5).addBox(-0.5F, 1.0F, -0.75F, 1.0F, 0.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(1.5F, 23.0F, -0.25F));
-        partDefinition.addOrReplaceChild("fucku", CubeListBuilder.create().texOffs(0, 0).addBox(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+        partDefinition.addOrReplaceChild("head", CubeListBuilder.create()
+                .texOffs(0, 0).addBox(-2.0F, -4.0F, -2.5F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F))
+                .texOffs(16, 0).addBox(-2.0F, -1.0F, -4.5F, 4.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 19.0F, -2.5F));
+        partDefinition.addOrReplaceChild("held_item", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 5.5F, -5.0F));
+        partDefinition.addOrReplaceChild("body", CubeListBuilder.create()
+                .texOffs(0, 8).addBox(-2.5F, -2.0F, -3.0F, 5.0F, 4.0F, 6.0F, new CubeDeformation(0.0F))
+                .texOffs(16, 3).addBox(-1.5F, -3.0F, 2.0F, 3.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(0.0F, 21.0F, 0.0F));
+        PartDefinition feet = partDefinition.addOrReplaceChild("feet", CubeListBuilder.create(),
+                PartPose.offset(0.0F, 23.0F, 0.5F));
+        feet.addOrReplaceChild("left_foot", CubeListBuilder.create()
+                .texOffs(16, 5).addBox(0.0F, 0.0F, -1.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(-2.0F, 0.0F, 0.0F));
+        feet.addOrReplaceChild("right_foot", CubeListBuilder.create()
+                .texOffs(16, 5).addBox(0.0F, 0.0F, -1.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
+                PartPose.offset(1.0F, 0.0F, 0.0F));
         return LayerDefinition.create(meshDefinition, 32, 32);
     }
 
     @Override
     protected Iterable<ModelPart> headParts() {
-        return ImmutableList.of(this.fucku);
+        return ImmutableList.of(this.head);
     }
 
     @Override
     protected Iterable<ModelPart> bodyParts() {
-        return ImmutableList.of(this.head, this.body, this.rightpaw, this.leftpaw);
+        return ImmutableList.of(this.body, this.feet);
     }
 
     @Override
-    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw,
+            float headPitch) {
         this.head.xRot = headPitch * ((float) Math.PI / 180F);
-        this.head.yRot = headPitch * ((float) Math.PI / 180F);
-        this.rightpaw.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
+        this.head.yRot = netHeadYaw * ((float) Math.PI / 180F);
+        this.leftFoot.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
+        this.rightFoot.xRot = Mth.cos(limbSwing * 0.6662F + (float) Math.PI) * 1.4F * limbSwingAmount;
     }
 }

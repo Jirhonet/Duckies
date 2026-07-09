@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Prepare Forge Client",
+      "command": "./gradlew",
+      "type": "shell",
+      "args": [
+        ":common:classes",
+        ":forge:classes",
+        ":forge:configureClientLaunch"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "Prepare Fabric Client",
+      "command": "./gradlew",
+      "type": "shell",
+      "args": [
+        ":common:classes",
+        ":fabric:classes",
+        ":fabric:configureClientLaunch"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "Build Forge",
+      "command": "./gradlew",
+      "type": "shell",
+      "args": [
+        ":forge:build"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "Build Fabric",
+      "command": "./gradlew",
+      "type": "shell",
+      "args": [
+        ":fabric:build"
+      ],
+      "group": "build"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Minecraft Client (Forge)",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/forge/run",
+      "console": "integratedTerminal",
+      "stopOnEntry": false,
+      "mainClass": "dev.architectury.transformer.TransformerRuntime",
+      "classPaths": [
+        "${env:HOME}/.gradle/caches/modules-2/files-2.1/dev.architectury/architectury-transformer/5.2.91/405782a5ff1efc672fb42d7c96c7bfd634500f7/architectury-transformer-5.2.91-runtime.jar",
+        "${env:HOME}/.gradle/caches/modules-2/files-2.1/net.fabricmc/dev-launch-injector/0.2.1+build.8/da8bef7e6e2f952da707f282bdb46882a0fce5e3/dev-launch-injector-0.2.1+build.8.jar",
+        "${env:HOME}/.gradle/caches/modules-2/files-2.1/cpw.mods/bootstraplauncher/1.1.2/c546e00443d8432cda6baa1c860346980742628/bootstraplauncher-1.1.2.jar"
+      ],
+      "vmArgs": "-Dfabric.dli.config=${workspaceFolder}/forge/.gradle/loom-cache/launch.cfg -Dfabric.dli.env=client -Djava.net.preferIPv6Addresses=system -p ${env:HOME}/.gradle/caches/modules-2/files-2.1/cpw.mods/securejarhandler/2.1.4/f47e3b9dd860a7b82154b8f90a650ffd0aaa5582/securejarhandler-2.1.4.jar:${env:HOME}/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-commons/9.5/19ab5b5800a3910d30d3a3e64fdb00fd0cb42de0/asm-commons-9.5.jar:${env:HOME}/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-util/9.5/64b5a1fc8c1b15ed2efd6a063e976bc8d3dc5ffe/asm-util-9.5.jar:${env:HOME}/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-analysis/9.5/490bacc77de7cbc0be1a30bb3471072d705be4a4/asm-analysis-9.5.jar:${env:HOME}/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm-tree/9.5/fd33c8b6373abaa675be407082fdfda35021254a/asm-tree-9.5.jar:${env:HOME}/.gradle/caches/modules-2/files-2.1/org.ow2.asm/asm/9.5/dc6ea1875f4d64fbc85e1691c95b96a3d8569c90/asm-9.5.jar:${env:HOME}/.gradle/caches/modules-2/files-2.1/net.minecraftforge/JarJarFileSystems/0.3.16/e52afbb2599dc7c6f779efea0496d32fc01152e3/JarJarFileSystems-0.3.16.jar --add-modules ALL-MODULE-PATH --add-opens java.base/java.util.jar=cpw.mods.securejarhandler --add-opens java.base/java.lang.invoke=cpw.mods.securejarhandler --add-exports java.base/sun.security.util=cpw.mods.securejarhandler --add-exports jdk.naming.dns/com.sun.jndi.dns=java.naming -Dfabric.dli.main=cpw.mods.bootstraplauncher.BootstrapLauncher -Darchitectury.main.class=${workspaceFolder}/forge/.gradle/architectury/.main_class -Darchitectury.runtime.transformer=${workspaceFolder}/forge/.gradle/architectury/.transforms -Darchitectury.properties=${workspaceFolder}/forge/.gradle/architectury/.properties -Djdk.attach.allowAttachSelf=true -javaagent:${workspaceFolder}/.gradle/architectury/architectury-transformer-agent.jar",
+      "args": "",
+      "env": {
+        "MOD_CLASSES": "main%%${workspaceFolder}/forge/build/resources/main:main%%${workspaceFolder}/forge/build/classes/java/main",
+        "MCP_MAPPINGS": "loom.stub"
+      },
+      "projectName": "forge",
+      "preLaunchTask": "Prepare Forge Client",
+      "presentation": {
+        "group": "Mod Development",
+        "order": 0
+      }
+    },
+    {
+      "type": "java",
+      "name": "Minecraft Client (Fabric)",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/fabric/run",
+      "console": "integratedTerminal",
+      "stopOnEntry": false,
+      "mainClass": "dev.architectury.transformer.TransformerRuntime",
+      "vmArgs": "-Dfabric.dli.config=${workspaceFolder}/fabric/.gradle/loom-cache/launch.cfg -Dfabric.dli.env=client -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Darchitectury.main.class=${workspaceFolder}/fabric/.gradle/architectury/.main_class -Darchitectury.runtime.transformer=${workspaceFolder}/fabric/.gradle/architectury/.transforms -Darchitectury.properties=${workspaceFolder}/fabric/.gradle/architectury/.properties -Djdk.attach.allowAttachSelf=true -javaagent:${workspaceFolder}/.gradle/architectury/architectury-transformer-agent.jar",
+      "args": "",
+      "env": {},
+      "projectName": "fabric",
+      "preLaunchTask": "Prepare Fabric Client",
+      "presentation": {
+        "group": "Mod Development",
+        "order": 1
+      }
+    }
+  ]
+}

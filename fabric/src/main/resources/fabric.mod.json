@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "duckies",
+  "version": "${version}",
+  "name": "Duckies",
+  "description": "A mod that adds ducks and stuff.",
+  "authors": [
+    "Jirho"
+  ],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.jirho.duckies.fabric.DuckiesFabric"
+    ]
+  },
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.19.2",
+    "architectury": ">=6.5.85"
+  }
+}

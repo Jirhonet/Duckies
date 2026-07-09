@@ -1,0 +1,28 @@
+{
+	"entity.duck.ambient" : {
+		"sounds": [
+			"duckies:quack1",
+			"duckies:quack2",
+			"duckies:quack3"
+		]
+	},
+	"entity.duck.hurt" : {
+		"sounds": [
+			"duckies:hurt1",
+			"duckies:hurt2",
+			"duckies:hurt3"
+		]
+	},
+	"entity.duck.death" : {
+		"sounds": [
+			"duckies:death"
+		]
+	},
+	"entity.duck.attack" : {
+		"sounds": [
+			"duckies:attack1",
+			"duckies:attack2",
+			"duckies:attack3"
+		]
+	}
+}

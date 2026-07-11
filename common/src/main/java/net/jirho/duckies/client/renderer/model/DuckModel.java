@@ -22,6 +22,7 @@ public class DuckModel<T extends Duck> extends AgeableListModel<T> {
     public static final float BABY_HEAD_SCALE = 2.0F;
     public static final float BABY_Y_HEAD_OFFSET = 9.7F;
     public static final float BABY_Z_HEAD_OFFSET = 1.0F;
+    private static final float FALLING_FOOT_SWING_SPEED = 1.75F;
 
     public final ModelPart head;
     public final ModelPart heldItem;
@@ -94,7 +95,23 @@ public class DuckModel<T extends Duck> extends AgeableListModel<T> {
             float headPitch) {
         this.head.xRot = headPitch * ((float) Math.PI / 180F);
         this.head.yRot = netHeadYaw * ((float) Math.PI / 180F);
-        this.leftFoot.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
-        this.rightFoot.xRot = Mth.cos(limbSwing * 0.6662F + (float) Math.PI) * 1.4F * limbSwingAmount;
+
+        float footSwing;
+        float footSwingAmount;
+        if (this.isFalling(entity)) {
+            footSwing = ageInTicks * FALLING_FOOT_SWING_SPEED;
+            footSwingAmount = 1.0F;
+        } else {
+            footSwing = limbSwing;
+            footSwingAmount = limbSwingAmount;
+        }
+
+        this.leftFoot.xRot = Mth.cos(footSwing * 0.6662F) * 1.4F * footSwingAmount;
+        this.rightFoot.xRot = Mth.cos(footSwing * 0.6662F + (float) Math.PI) * 1.4F * footSwingAmount;
+    }
+
+    private boolean isFalling(T entity) {
+        return !entity.isOnGround()
+                && !entity.isInSittingPose();
     }
 }

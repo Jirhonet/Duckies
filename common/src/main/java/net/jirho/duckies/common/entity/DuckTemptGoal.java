@@ -13,9 +13,17 @@ public class DuckTemptGoal extends TemptGoal {
 
     @Override
     public boolean canUse() {
-        if (this.duck.isHoldingConsumable()) {
+        if (this.duck.isHoldingConsumable() || this.duck.isAngry() || this.duck.getTarget() != null) {
             return false;
         }
         return super.canUse();
+    }
+
+    @Override
+    public boolean canContinueToUse() {
+        if (this.duck.isAngry() || this.duck.getTarget() != null) {
+            return false;
+        }
+        return super.canContinueToUse();
     }
 }

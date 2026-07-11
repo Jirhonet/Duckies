@@ -3,8 +3,6 @@ package net.jirho.duckies.common.entity;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.AABB;
@@ -20,8 +18,7 @@ public class DuckSearchForItemsGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        ItemStack heldItem = this.duck.getItemBySlot(EquipmentSlot.MAINHAND);
-        if (!heldItem.isEmpty() && this.duck.getPickupPriority(heldItem) >= 3) {
+        if (this.duck.isHoldingConsumable()) {
             return false;
         }
         if (this.duck.getTarget() != null || this.duck.getLastHurtByMob() != null) {
@@ -37,6 +34,20 @@ public class DuckSearchForItemsGoal extends Goal {
     }
 
     @Override
+    public boolean canContinueToUse() {
+        if (this.duck.isHoldingConsumable()) {
+            return false;
+        }
+        if (this.duck.getTarget() != null || this.duck.getLastHurtByMob() != null) {
+            return false;
+        }
+        if (!this.duck.canMove()) {
+            return false;
+        }
+        return !this.findNearbyItems().isEmpty();
+    }
+
+    @Override
     public void start() {
         List<ItemEntity> items = this.findNearbyItems();
         if (!items.isEmpty()) {
@@ -46,6 +57,9 @@ public class DuckSearchForItemsGoal extends Goal {
 
     @Override
     public void tick() {
+        if (this.duck.isHoldingConsumable()) {
+            return;
+        }
         List<ItemEntity> items = this.findNearbyItems();
         if (!items.isEmpty()) {
             this.duck.getNavigation().moveTo(items.get(0), 1.2D);

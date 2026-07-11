@@ -23,6 +23,7 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -52,13 +53,18 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -66,6 +72,8 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 
 public class Duck extends TamableAnimal implements NeutralMob {
+    private static final EntityDataAccessor<Integer> DATA_COLOR = SynchedEntityData.defineId(Duck.class,
+            EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(Duck.class,
             EntityDataSerializers.INT);
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
@@ -89,10 +97,10 @@ public class Duck extends TamableAnimal implements NeutralMob {
         this.goalSelector.addGoal(2, new DuckSwimGoal(this));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
         this.goalSelector.addGoal(4, new BreedGoal(this, 1.0D));
-        this.goalSelector.addGoal(5,
-                new DuckTemptGoal(this, 1.0D, Ingredient.of(DuckiesTags.DUCK_EDIBLE), false));
+        this.goalSelector.addGoal(5, new MeleeAttackGoal(this, 1.0D, true));
         this.goalSelector.addGoal(6, new LeapAtTargetGoal(this, 0.4F));
-        this.goalSelector.addGoal(7, new MeleeAttackGoal(this, 1.0D, true));
+        this.goalSelector.addGoal(7,
+                new DuckTemptGoal(this, 1.0D, Ingredient.of(DuckiesTags.DUCK_EDIBLE), false));
         this.goalSelector.addGoal(8, new FollowParentGoal(this, 1.1D));
         this.goalSelector.addGoal(9, new RandomStrollGoal(this, 1.0D));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Player.class, 6.0F));
@@ -117,19 +125,32 @@ public class Duck extends TamableAnimal implements NeutralMob {
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        tag.putByte("Color", (byte) this.getColor().getId());
         this.addPersistentAngerSaveData(tag);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        if (tag.contains("Color", 99)) {
+            this.setColor(DyeColor.byId(tag.getInt("Color")));
+        }
         this.readPersistentAngerSaveData(this.level, tag);
     }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(DATA_COLOR, DyeColor.RED.getId());
         this.entityData.define(DATA_REMAINING_ANGER_TIME, 0);
+    }
+
+    public DyeColor getColor() {
+        return DyeColor.byId(this.entityData.get(DATA_COLOR));
+    }
+
+    public void setColor(DyeColor color) {
+        this.entityData.set(DATA_COLOR, color.getId());
     }
 
     @Override
@@ -140,6 +161,22 @@ public class Duck extends TamableAnimal implements NeutralMob {
             ++this.ticksSinceEaten;
             this.tryConsumeHeldItem();
         }
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (!this.onGround) {
+            Vec3 movement = this.getDeltaMovement();
+            if (movement.y < 0.0D) {
+                this.setDeltaMovement(movement.multiply(1.0D, 0.6D, 1.0D));
+            }
+        }
+    }
+
+    @Override
+    public boolean causeFallDamage(float distance, float damageMultiplier, DamageSource source) {
+        return false;
     }
 
     public boolean canMove() {
@@ -376,6 +413,9 @@ public class Duck extends TamableAnimal implements NeutralMob {
             if ((this.isFood(itemStack) || this.isDuckEdible(itemStack)) && this.getHealth() < this.getMaxHealth()) {
                 return InteractionResult.CONSUME;
             }
+            if (this.isTame() && itemStack.getItem() instanceof DyeItem) {
+                return InteractionResult.CONSUME;
+            }
             if (this.isTame() && this.isOwnedBy(player) && !this.isFood(itemStack)) {
                 return InteractionResult.CONSUME;
             }
@@ -392,6 +432,18 @@ public class Duck extends TamableAnimal implements NeutralMob {
                 }
                 this.feedDuckEdible(itemStack);
                 return InteractionResult.CONSUME;
+            }
+
+            Item item = itemStack.getItem();
+            if (item instanceof DyeItem dyeItem) {
+                DyeColor dyeColor = dyeItem.getDyeColor();
+                if (dyeColor != this.getColor()) {
+                    this.setColor(dyeColor);
+                    if (!player.getAbilities().instabuild) {
+                        itemStack.shrink(1);
+                    }
+                }
+                return InteractionResult.SUCCESS;
             }
 
             InteractionResult interactionResult = super.mobInteract(player, hand);
@@ -454,7 +506,45 @@ public class Duck extends TamableAnimal implements NeutralMob {
 
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob parent) {
-        return DuckiesRegistries.DUCK.get().create(level);
+        Duck duck = DuckiesRegistries.DUCK.get().create(level);
+        UUID owner = this.getOwnerUUID();
+        if (owner != null) {
+            duck.setOwnerUUID(owner);
+            duck.setTame(true);
+        }
+        duck.setColor(this.getOffspringColor((Duck) parent));
+        return duck;
+    }
+
+    private DyeColor getOffspringColor(Duck otherParent) {
+        DyeColor parentColor = this.getColor();
+        DyeColor otherColor = otherParent.getColor();
+        CraftingContainer container = makeDyeContainer(parentColor, otherColor);
+        return this.level.getRecipeManager()
+                .getRecipeFor(RecipeType.CRAFTING, container, this.level)
+                .map(recipe -> recipe.assemble(container))
+                .map(ItemStack::getItem)
+                .filter(DyeItem.class::isInstance)
+                .map(DyeItem.class::cast)
+                .map(DyeItem::getDyeColor)
+                .orElseGet(() -> this.random.nextBoolean() ? parentColor : otherColor);
+    }
+
+    private static CraftingContainer makeDyeContainer(DyeColor first, DyeColor second) {
+        CraftingContainer container = new CraftingContainer(new AbstractContainerMenu(null, -1) {
+            @Override
+            public ItemStack quickMoveStack(Player player, int slot) {
+                return ItemStack.EMPTY;
+            }
+
+            @Override
+            public boolean stillValid(Player player) {
+                return false;
+            }
+        }, 2, 1);
+        container.setItem(0, new ItemStack(DyeItem.byColor(first)));
+        container.setItem(1, new ItemStack(DyeItem.byColor(second)));
+        return container;
     }
 
     @Override

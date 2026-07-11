@@ -1,5 +1,7 @@
 package net.jirho.duckies.client.renderer;
 
+import net.jirho.duckies.client.renderer.layers.DuckAngryLayer;
+import net.jirho.duckies.client.renderer.layers.DuckColorLayer;
 import net.jirho.duckies.client.renderer.layers.DuckHeldItemLayer;
 import net.jirho.duckies.client.renderer.model.DuckModel;
 import net.jirho.duckies.common.entity.Duck;
@@ -12,6 +14,8 @@ public class DuckRenderer extends MobRenderer<Duck, DuckModel<Duck>> {
 
     public DuckRenderer(EntityRendererProvider.Context context) {
         super(context, new DuckModel<>(context.bakeLayer(DuckModel.LAYER_LOCATION)), 0.3F);
+        this.addLayer(new DuckAngryLayer(this));
+        this.addLayer(new DuckColorLayer(this));
         this.addLayer(new DuckHeldItemLayer(this, context.getItemInHandRenderer()));
     }
 

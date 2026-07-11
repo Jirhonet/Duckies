@@ -36,7 +36,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:kelp",
+          "name": "duckies:duckweed",
           "functions": [
             {
               "function": "minecraft:set_count",

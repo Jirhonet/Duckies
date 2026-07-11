@@ -33,8 +33,9 @@ public class DuckHeldItemLayer extends RenderLayer<Duck, DuckModel<Duck>> {
 
         poseStack.pushPose();
         if (duck.isBaby()) {
-            poseStack.scale(0.75F, 0.75F, 0.75F);
-            poseStack.translate(0.0D, 0.5D, 0.209375D);
+            float headScale = 1.5F / DuckModel.BABY_HEAD_SCALE;
+            poseStack.scale(headScale, headScale, headScale);
+            poseStack.translate(0.0F, DuckModel.BABY_Y_HEAD_OFFSET / 16.0F, DuckModel.BABY_Z_HEAD_OFFSET / 16.0F);
         }
 
         DuckModel<Duck> model = this.getParentModel();

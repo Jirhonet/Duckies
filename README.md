@@ -1,11 +1,17 @@
-A simple mod that adds ducks to Minecraft.
+A simple mod that adds tameable ducks to Minecraft.
 
 ### Ducks
 
 - Ducks are neutral mobs (they will attack when provoked).
+- Ducks can pick up items and hold on to them.
+- Ducks will drop any item they are holding to pick up duckweed.
+- Ducks can eat duckweed, sea grass, seeds, melon slices and berries.
+- Ducks will drink potions if they pick them up.
 - They can be tamed and bred with duckweed.
+- Tamed ducks will fight for you.
 - Ducks can be found near river biomes (on land or swimming).
-- They drop feathers and kelp when killed.
+- Ducks prefer to be swimming in the water.
+- They drop feathers and duckweed when killed.
 
 ### Duckweed
 

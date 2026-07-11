@@ -1,8 +1,8 @@
 package net.jirho.duckies.common.entity;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
-import net.jirho.duckies.init.DuckiesRegistries;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -21,11 +21,7 @@ public class DuckSearchForItemsGoal extends Goal {
     @Override
     public boolean canUse() {
         ItemStack heldItem = this.duck.getItemBySlot(EquipmentSlot.MAINHAND);
-        if (!heldItem.isEmpty() && !heldItem.is(DuckiesRegistries.DUCKWEED_ITEM.get())) {
-            if (this.findNearbyItems().isEmpty()) {
-                return false;
-            }
-        } else if (!heldItem.isEmpty()) {
+        if (!heldItem.isEmpty() && this.duck.getPickupPriority(heldItem) >= 3) {
             return false;
         }
         if (this.duck.getTarget() != null || this.duck.getLastHurtByMob() != null) {
@@ -50,22 +46,19 @@ public class DuckSearchForItemsGoal extends Goal {
 
     @Override
     public void tick() {
-        if (this.duck.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty()) {
-            List<ItemEntity> items = this.findNearbyItems();
-            if (!items.isEmpty()) {
-                this.duck.getNavigation().moveTo(items.get(0), 1.2D);
-            }
+        List<ItemEntity> items = this.findNearbyItems();
+        if (!items.isEmpty()) {
+            this.duck.getNavigation().moveTo(items.get(0), 1.2D);
         }
     }
 
     private List<ItemEntity> findNearbyItems() {
         AABB searchArea = this.duck.getBoundingBox().inflate(8.0D, 8.0D, 8.0D);
-        ItemStack heldItem = this.duck.getItemBySlot(EquipmentSlot.MAINHAND);
-        Predicate<ItemEntity> predicate = ALLOWED_ITEMS;
-        if (!heldItem.isEmpty() && !heldItem.is(DuckiesRegistries.DUCKWEED_ITEM.get())) {
-            predicate = itemEntity -> ALLOWED_ITEMS.test(itemEntity)
-                    && itemEntity.getItem().is(DuckiesRegistries.DUCKWEED_ITEM.get());
-        }
-        return this.duck.level.getEntitiesOfClass(ItemEntity.class, searchArea, predicate);
+        return this.duck.level.getEntitiesOfClass(ItemEntity.class, searchArea, ALLOWED_ITEMS).stream()
+                .filter(itemEntity -> this.duck.canHoldItem(itemEntity.getItem()))
+                .sorted(Comparator.comparingInt((ItemEntity itemEntity) -> this.duck.getPickupPriority(itemEntity.getItem()))
+                        .reversed()
+                        .thenComparingDouble(itemEntity -> itemEntity.distanceToSqr(this.duck)))
+                .toList();
     }
 }

@@ -1,0 +1,32 @@
+{
+  "parent": "duckies:what_the_duck",
+  "display": {
+    "icon": {
+      "item": "duckies:duckweed"
+    },
+    "title": {
+      "translate": "advancements.duckies.i_love_you.title"
+    },
+    "description": {
+      "translate": "advancements.duckies.i_love_you.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "tamed_duck": {
+      "trigger": "minecraft:tame_animal",
+      "conditions": {
+        "entity": {
+          "type": "duckies:duck"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "tamed_duck"
+    ]
+  ]
+}

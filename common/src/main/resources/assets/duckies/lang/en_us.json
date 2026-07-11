@@ -2,5 +2,13 @@
 	"block.duckies.duckweed": "Duckweed",
 	"item.duckies.duckweed": "Duckweed",
 	"item.duckies.duck_spawn_egg": "Duck Spawn Egg",
-	"entity.duckies.duck": "Duck"
+	"entity.duckies.duck": "Duck",
+	"advancements.duckies.what_the_duck.title": "What the DUCK",
+	"advancements.duckies.what_the_duck.description": "Slay a duck",
+	"advancements.duckies.lemonade_stand.title": "Lemonade Stand",
+	"advancements.duckies.lemonade_stand.description": "Feed a duck a potion",
+	"advancements.duckies.peace_was_never_an_option.title": "Peace was never an option",
+	"advancements.duckies.peace_was_never_an_option.description": "Give a duck a sword",
+	"advancements.duckies.i_love_you.title": "I love you",
+	"advancements.duckies.i_love_you.description": "Tame a duck"
 }

@@ -2,14 +2,19 @@ package net.jirho.duckies.common.entity;
 
 import java.util.UUID;
 
+import net.jirho.duckies.common.advancement.DuckiesAdvancements;
 import net.jirho.duckies.init.DuckiesRegistries;
+import net.jirho.duckies.init.DuckiesTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
@@ -41,15 +46,18 @@ import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
-import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -61,11 +69,13 @@ public class Duck extends TamableAnimal implements NeutralMob {
     private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(Duck.class,
             EntityDataSerializers.INT);
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
-    private static final int DUCKWEED_EAT_DELAY = 100;
+    private static final int HELD_ITEM_CONSUME_DELAY = 100;
+    private static final float WATER_SWIM_SPEED_SCALE = 0.5F;
     private static final EntityDataAccessor<Boolean> DATA_SUFFOCATING = SynchedEntityData.defineId(Duck.class,
             EntityDataSerializers.BOOLEAN);
     private UUID persistentAngerTarget;
     private int ticksSinceEaten;
+    private UUID consumableProvider;
 
     public Duck(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
@@ -80,7 +90,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
         this.goalSelector.addGoal(4, new BreedGoal(this, 1.0D));
         this.goalSelector.addGoal(5,
-                new TemptGoal(this, 1.0D, Ingredient.of(DuckiesRegistries.DUCKWEED_ITEM.get()), false));
+                new DuckTemptGoal(this, 1.0D, Ingredient.of(DuckiesTags.DUCK_EDIBLE), false));
         this.goalSelector.addGoal(6, new LeapAtTargetGoal(this, 0.4F));
         this.goalSelector.addGoal(7, new MeleeAttackGoal(this, 1.0D, true));
         this.goalSelector.addGoal(8, new FollowParentGoal(this, 1.1D));
@@ -128,7 +138,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
         if (!this.level.isClientSide) {
             this.updatePersistentAnger((ServerLevel) this.level, true);
             ++this.ticksSinceEaten;
-            this.tryEatHeldDuckweed();
+            this.tryConsumeHeldItem();
         }
     }
 
@@ -142,38 +152,119 @@ public class Duck extends TamableAnimal implements NeutralMob {
         if (slot != EquipmentSlot.MAINHAND || !super.canTakeItem(stack)) {
             return false;
         }
-        if (this.isDuckweed(stack)) {
-            return true;
-        }
-        return this.getItemBySlot(slot).isEmpty();
+        return this.canHoldItem(stack);
     }
 
     public boolean canHoldItem(ItemStack stack) {
         if (this.isDuckweed(stack)) {
-            return true;
+            return !this.isHoldingDuckweed();
         }
         ItemStack heldItem = this.getItemBySlot(EquipmentSlot.MAINHAND);
         if (heldItem.isEmpty()) {
             return true;
         }
-        return this.ticksSinceEaten > 0 && stack.getItem().isEdible() && !heldItem.getItem().isEdible();
+        return this.getPickupPriority(stack) > this.getPickupPriority(heldItem);
+    }
+
+    public int getPickupPriority(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return 0;
+        }
+        if (this.isDuckweed(stack)) {
+            return 3;
+        }
+        if (this.isDuckEdible(stack) || this.isDrinkablePotion(stack)) {
+            return 2;
+        }
+        return 1;
+    }
+
+    public boolean isDuckEdible(ItemStack stack) {
+        return !this.isDuckweed(stack) && stack.is(DuckiesTags.DUCK_EDIBLE);
+    }
+
+    public boolean isDrinkablePotion(ItemStack stack) {
+        return stack.is(Items.POTION) && this.hasEffectivePotionEffects(stack);
+    }
+
+    private boolean hasEffectivePotionEffects(ItemStack stack) {
+        return !PotionUtils.getMobEffects(stack).isEmpty();
+    }
+
+    public boolean isHoldingConsumable() {
+        ItemStack heldItem = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        return this.isConsumable(heldItem);
+    }
+
+    private boolean isConsumable(ItemStack stack) {
+        return this.isDuckweed(stack) || this.isDuckEdible(stack) || this.isDrinkablePotion(stack);
     }
 
     private boolean isDuckweed(ItemStack stack) {
         return stack.is(DuckiesRegistries.DUCKWEED_ITEM.get());
     }
 
-    private void tryEatHeldDuckweed() {
+    private boolean isHoldingDuckweed() {
+        return this.isDuckweed(this.getItemBySlot(EquipmentSlot.MAINHAND));
+    }
+
+    private void tryConsumeHeldItem() {
         ItemStack heldItem = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        if (!this.isDuckweed(heldItem) || this.ticksSinceEaten < DUCKWEED_EAT_DELAY) {
+        if (heldItem.isEmpty() || this.ticksSinceEaten < HELD_ITEM_CONSUME_DELAY) {
             return;
         }
+        if (this.isDuckweed(heldItem) || this.isDuckEdible(heldItem)) {
+            this.consumeHeldFood(heldItem);
+        } else if (this.isDrinkablePotion(heldItem)) {
+            this.drinkHeldPotion(heldItem);
+        }
+    }
+
+    private void consumeHeldFood(ItemStack heldItem) {
+        ItemStack eatenItem = heldItem.copy();
         this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
         this.playSound(SoundEvents.GENERIC_EAT, 1.0F, 1.0F);
+        this.spawnEatParticles(eatenItem);
         if (this.getHealth() < this.getMaxHealth()) {
             this.heal(2.0F);
         }
         this.ticksSinceEaten = 0;
+    }
+
+    private void drinkHeldPotion(ItemStack heldItem) {
+        ItemStack drunkItem = heldItem.copy();
+        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GLASS_BOTTLE));
+        this.playSound(SoundEvents.GENERIC_DRINK, 1.0F, 1.0F);
+        for (MobEffectInstance effect : PotionUtils.getMobEffects(drunkItem)) {
+            if (effect.getEffect().isInstantenous()) {
+                effect.getEffect().applyInstantenousEffect(this, this, this, effect.getAmplifier(), 1.0D);
+            } else {
+                this.addEffect(new MobEffectInstance(effect));
+            }
+        }
+        if (this.consumableProvider != null && this.level instanceof ServerLevel serverLevel) {
+            Player player = serverLevel.getPlayerByUUID(this.consumableProvider);
+            if (player instanceof ServerPlayer serverPlayer) {
+                DuckiesAdvancements.grant(serverPlayer, DuckiesAdvancements.LEMONADE_STAND, "fed_potion");
+            }
+        }
+        this.consumableProvider = null;
+        this.ticksSinceEaten = 0;
+    }
+
+    private void spawnEatParticles(ItemStack stack) {
+        if (this.level instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(
+                    new ItemParticleOption(ParticleTypes.ITEM, stack),
+                    this.getX(),
+                    this.getY() + (double) this.getBbHeight() * 0.5D,
+                    this.getZ(),
+                    7,
+                    0.2D,
+                    0.1D,
+                    0.2D,
+                    0.05D);
+        }
     }
 
     @Override
@@ -182,6 +273,9 @@ public class Duck extends TamableAnimal implements NeutralMob {
         if (!this.canHoldItem(stack)) {
             return;
         }
+
+        ItemStack pickedUpItem = stack.copy();
+        pickedUpItem.setCount(1);
 
         int count = stack.getCount();
         if (count > 1) {
@@ -192,14 +286,39 @@ public class Duck extends TamableAnimal implements NeutralMob {
         this.onItemPickup(itemEntity);
         this.setItemSlot(EquipmentSlot.MAINHAND, stack.split(1));
         this.setGuaranteedDrop(EquipmentSlot.MAINHAND);
-        this.take(itemEntity, stack.getCount());
+        this.take(itemEntity, pickedUpItem.getCount());
         itemEntity.discard();
         this.ticksSinceEaten = 0;
+
+        UUID provider = this.getItemProvider(itemEntity);
+        if (provider != null && this.level instanceof ServerLevel serverLevel) {
+            Player player = serverLevel.getPlayerByUUID(provider);
+            if (player instanceof ServerPlayer serverPlayer) {
+                if (pickedUpItem.getItem() instanceof SwordItem) {
+                    DuckiesAdvancements.grant(serverPlayer, DuckiesAdvancements.PEACE_WAS_NEVER_AN_OPTION,
+                            "gave_sword");
+                } else if (pickedUpItem.is(Items.POTION) && this.hasEffectivePotionEffects(pickedUpItem)) {
+                    this.consumableProvider = provider;
+                }
+            }
+        }
+    }
+
+    private UUID getItemProvider(ItemEntity itemEntity) {
+        UUID thrower = itemEntity.getThrower();
+        if (thrower != null) {
+            return thrower;
+        }
+        return itemEntity.getOwner();
     }
 
     private void spitOutItem(ItemStack stack) {
         if (stack.isEmpty() || this.level.isClientSide) {
             return;
+        }
+
+        if (stack.is(Items.POTION)) {
+            this.consumableProvider = null;
         }
 
         ItemEntity itemEntity = new ItemEntity(this.level, this.getX() + this.getLookAngle().x, this.getY() + 1.0D,
@@ -242,10 +361,21 @@ public class Duck extends TamableAnimal implements NeutralMob {
                 && super.canMate(otherAnimal);
     }
 
+    private void feedDuckEdible(ItemStack food) {
+        this.playSound(SoundEvents.GENERIC_EAT, 1.0F, 1.0F);
+        this.spawnEatParticles(food);
+        if (this.getHealth() < this.getMaxHealth()) {
+            this.heal(2.0F);
+        }
+    }
+
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         if (this.level.isClientSide) {
+            if ((this.isFood(itemStack) || this.isDuckEdible(itemStack)) && this.getHealth() < this.getMaxHealth()) {
+                return InteractionResult.CONSUME;
+            }
             if (this.isTame() && this.isOwnedBy(player) && !this.isFood(itemStack)) {
                 return InteractionResult.CONSUME;
             }
@@ -256,11 +386,11 @@ public class Duck extends TamableAnimal implements NeutralMob {
         }
 
         if (this.isTame()) {
-            if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
+            if ((this.isFood(itemStack) || this.isDuckEdible(itemStack)) && this.getHealth() < this.getMaxHealth()) {
                 if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
                 }
-                this.heal(2.0F);
+                this.feedDuckEdible(itemStack);
                 return InteractionResult.CONSUME;
             }
 
@@ -286,6 +416,14 @@ public class Duck extends TamableAnimal implements NeutralMob {
                 this.level.broadcastEntityEvent(this, (byte) 6);
             }
             return InteractionResult.SUCCESS;
+        }
+
+        if ((this.isFood(itemStack) || this.isDuckEdible(itemStack)) && this.getHealth() < this.getMaxHealth()) {
+            if (!player.getAbilities().instabuild) {
+                itemStack.shrink(1);
+            }
+            this.feedDuckEdible(itemStack);
+            return InteractionResult.CONSUME;
         }
 
         return super.mobInteract(player, hand);
@@ -321,10 +459,28 @@ public class Duck extends TamableAnimal implements NeutralMob {
 
     @Override
     public void travel(Vec3 vector) {
-        if (this.isEffectiveAi() && this.isInWater()) {
-            this.moveRelative(this.getSpeed(), vector);
+        if (this.isEffectiveAi() && this.isInWater() && this.isAffectedByFluids()) {
+            double yBefore = this.getY();
+            float waterSlowDown = this.getWaterSlowDown();
+
+            this.moveRelative(this.getSpeed() * WATER_SWIM_SPEED_SCALE, vector);
             this.move(MoverType.SELF, this.getDeltaMovement());
-            this.setDeltaMovement(this.getDeltaMovement().scale(0.2D));
+            Vec3 movement = this.getDeltaMovement();
+
+            if (this.horizontalCollision && this.onClimbable()) {
+                movement = new Vec3(movement.x, 0.2D, movement.z);
+            }
+
+            this.setDeltaMovement(movement.multiply(waterSlowDown, 0.8D, waterSlowDown));
+            movement = this.getFluidFallingAdjustedMovement(0.08D, movement.y <= 0.0D, this.getDeltaMovement());
+            this.setDeltaMovement(movement);
+
+            if (this.horizontalCollision) {
+                movement = this.getDeltaMovement();
+                if (this.isFree(movement.x, movement.y + 0.6D - this.getY() + yBefore, movement.z)) {
+                    this.setDeltaMovement(movement.x, 0.3D, movement.z);
+                }
+            }
         } else {
             super.travel(vector);
         }

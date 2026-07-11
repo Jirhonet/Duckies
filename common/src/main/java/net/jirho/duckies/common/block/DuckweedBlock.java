@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.WaterlilyBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -58,10 +59,17 @@ public class DuckweedBlock extends WaterlilyBlock implements BonemealableBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+        FluidState fluidAbove = blockGetter.getFluidState(blockPos.above());
+        if (fluidAbove.getType() != Fluids.EMPTY) {
+            return false;
+        }
+
         FluidState fluidState = blockGetter.getFluidState(blockPos);
-        FluidState fluidState2 = blockGetter.getFluidState(blockPos.above());
-        return (fluidState.getType() == Fluids.WATER || blockState.getMaterial() == Material.ICE)
-                && fluidState2.getType() == Fluids.EMPTY;
+        if (fluidState.getType() == Fluids.WATER || blockState.getMaterial() == Material.ICE) {
+            return true;
+        }
+
+        return Block.canSupportRigidBlock(blockGetter, blockPos);
     }
 
     @Override

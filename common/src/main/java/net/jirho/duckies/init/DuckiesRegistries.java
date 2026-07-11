@@ -6,6 +6,7 @@ import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.jirho.duckies.Duckies;
 import net.jirho.duckies.common.block.DuckweedBlock;
+import net.jirho.duckies.common.item.DuckweedBlockItem;
 import net.jirho.duckies.common.entity.Duck;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -14,7 +15,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.jirho.duckies.common.worldgen.DuckweedFeature;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -37,7 +37,7 @@ public final class DuckiesRegistries {
                     .sound(SoundType.GRASS)));
 
     public static final RegistrySupplier<Item> DUCKWEED_ITEM = ITEMS.register("duckweed", () ->
-            new PlaceOnWaterBlockItem(DUCKWEED.get(), new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
+            new DuckweedBlockItem(DUCKWEED.get(), new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
 
     public static final RegistrySupplier<EntityType<Duck>> DUCK = ENTITIES.register("duck", () ->
             EntityType.Builder.of(Duck::new, MobCategory.CREATURE)

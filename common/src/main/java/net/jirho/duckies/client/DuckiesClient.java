@@ -5,6 +5,7 @@ import net.fabricmc.api.Environment;
 import net.jirho.duckies.client.renderer.DuckRenderer;
 import net.jirho.duckies.client.renderer.model.DuckModel;
 import net.jirho.duckies.init.DuckiesRegistries;
+import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import dev.architectury.registry.client.rendering.ColorHandlerRegistry;
@@ -21,7 +22,8 @@ public final class DuckiesClient {
     public static void init() {
         EntityModelLayerRegistry.register(DuckModel.LAYER_LOCATION, DuckModel::createBodyLayer);
         EntityRendererRegistry.register(DuckiesRegistries.DUCK, DuckRenderer::new);
-        RenderTypeRegistry.register(RenderType.cutout(), DuckiesRegistries.DUCKWEED.get());
+        ClientLifecycleEvent.CLIENT_SETUP.register(minecraft ->
+                RenderTypeRegistry.register(RenderType.cutout(), DuckiesRegistries.DUCKWEED.get()));
         ColorHandlerRegistry.registerBlockColors((state, level, pos, tintIndex) -> {
             if (level != null && pos != null) {
                 return BiomeColors.getAverageFoliageColor(level, pos);

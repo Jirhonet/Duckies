@@ -1,0 +1,6 @@
+{
+	"parent": "duckies:block/duckweed_bed_3",
+	"textures": {
+		"duckweed": "duckies:block/duckweed"
+	}
+}

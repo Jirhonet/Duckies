@@ -1,0 +1,16 @@
+{
+	"ambientocclusion": false,
+	"textures": {
+		"particle": "#duckweed"
+	},
+	"elements": [
+		{
+			"from": [8, 1, 8],
+			"to": [16, 1, 16],
+			"faces": {
+				"up": { "uv": [8, 8, 16, 16], "texture": "#duckweed", "tintindex": 0 },
+				"down": { "uv": [8, 16, 16, 8], "texture": "#duckweed", "tintindex": 0 }
+			}
+		}
+	]
+}

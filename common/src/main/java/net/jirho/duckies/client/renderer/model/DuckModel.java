@@ -14,6 +14,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.TamableAnimal;
 
 public class DuckModel<T extends Duck> extends AgeableListModel<T> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
@@ -67,6 +68,21 @@ public class DuckModel<T extends Duck> extends AgeableListModel<T> {
     @Override
     protected Iterable<ModelPart> bodyParts() {
         return ImmutableList.of(this.body, this.feet);
+    }
+
+    @Override
+    public void prepareMobModel(T arg, float f, float g, float h) {
+        if (((TamableAnimal) arg).isInSittingPose()) {
+            this.body.setPos(0.0F, 22.0F, 0.0F);
+            this.feet.setPos(0.0F, 24.0F, 0.5F);
+            this.head.setPos(0.0F, 20.0F, -2.5F);
+            this.heldItem.setPos(0.0F, 4.5F, -5.0F);
+        } else {
+            this.body.setPos(0.0F, 21.0F, 0.0F);
+            this.feet.setPos(0.0F, 23.0F, 0.5F);
+            this.head.setPos(0.0F, 19.0F, -2.5F);
+            this.heldItem.setPos(0.0F, 5.5F, -5.0F);
+        }
     }
 
     @Override

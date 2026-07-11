@@ -49,9 +49,7 @@ import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -63,6 +61,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
     private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(Duck.class,
             EntityDataSerializers.INT);
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+    private static final int DUCKWEED_EAT_DELAY = 100;
     private static final EntityDataAccessor<Boolean> DATA_SUFFOCATING = SynchedEntityData.defineId(Duck.class,
             EntityDataSerializers.BOOLEAN);
     private UUID persistentAngerTarget;
@@ -81,7 +80,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
         this.goalSelector.addGoal(4, new BreedGoal(this, 1.0D));
         this.goalSelector.addGoal(5,
-                new TemptGoal(this, 1.0D, Ingredient.of(DuckiesRegistries.BREAD_CRUMBS.get()), false));
+                new TemptGoal(this, 1.0D, Ingredient.of(DuckiesRegistries.DUCKWEED_ITEM.get()), false));
         this.goalSelector.addGoal(6, new LeapAtTargetGoal(this, 0.4F));
         this.goalSelector.addGoal(7, new MeleeAttackGoal(this, 1.0D, true));
         this.goalSelector.addGoal(8, new FollowParentGoal(this, 1.1D));
@@ -129,6 +128,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
         if (!this.level.isClientSide) {
             this.updatePersistentAnger((ServerLevel) this.level, true);
             ++this.ticksSinceEaten;
+            this.tryEatHeldDuckweed();
         }
     }
 
@@ -139,16 +139,41 @@ public class Duck extends TamableAnimal implements NeutralMob {
     @Override
     public boolean canTakeItem(ItemStack stack) {
         EquipmentSlot slot = Mob.getEquipmentSlotForItem(stack);
-        if (!this.getItemBySlot(slot).isEmpty()) {
+        if (slot != EquipmentSlot.MAINHAND || !super.canTakeItem(stack)) {
             return false;
         }
-        return slot == EquipmentSlot.MAINHAND && super.canTakeItem(stack);
+        if (this.isDuckweed(stack)) {
+            return true;
+        }
+        return this.getItemBySlot(slot).isEmpty();
     }
 
     public boolean canHoldItem(ItemStack stack) {
-        Item item = stack.getItem();
+        if (this.isDuckweed(stack)) {
+            return true;
+        }
         ItemStack heldItem = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return heldItem.isEmpty() || this.ticksSinceEaten > 0 && item.isEdible() && !heldItem.getItem().isEdible();
+        if (heldItem.isEmpty()) {
+            return true;
+        }
+        return this.ticksSinceEaten > 0 && stack.getItem().isEdible() && !heldItem.getItem().isEdible();
+    }
+
+    private boolean isDuckweed(ItemStack stack) {
+        return stack.is(DuckiesRegistries.DUCKWEED_ITEM.get());
+    }
+
+    private void tryEatHeldDuckweed() {
+        ItemStack heldItem = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        if (!this.isDuckweed(heldItem) || this.ticksSinceEaten < DUCKWEED_EAT_DELAY) {
+            return;
+        }
+        this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        this.playSound(SoundEvents.GENERIC_EAT, 1.0F, 1.0F);
+        if (this.getHealth() < this.getMaxHealth()) {
+            this.heal(2.0F);
+        }
+        this.ticksSinceEaten = 0;
     }
 
     @Override
@@ -206,7 +231,15 @@ public class Duck extends TamableAnimal implements NeutralMob {
 
     @Override
     public boolean isFood(ItemStack stack) {
-        return Ingredient.of(DuckiesRegistries.BREAD_CRUMBS.get()).test(stack);
+        return stack.is(DuckiesRegistries.DUCKWEED_ITEM.get());
+    }
+
+    @Override
+    public boolean canMate(Animal otherAnimal) {
+        return otherAnimal instanceof Duck other
+                && this.isTame()
+                && other.isTame()
+                && super.canMate(otherAnimal);
     }
 
     @Override
@@ -216,7 +249,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
             if (this.isTame() && this.isOwnedBy(player) && !this.isFood(itemStack)) {
                 return InteractionResult.CONSUME;
             }
-            if (!this.isTame() && itemStack.is(Items.MELON_SLICE)) {
+            if (!this.isTame() && this.isFood(itemStack)) {
                 return InteractionResult.CONSUME;
             }
             return super.mobInteract(player, hand);
@@ -239,7 +272,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
             return interactionResult;
         }
 
-        if (itemStack.is(Items.MELON_SLICE)) {
+        if (this.isFood(itemStack)) {
             if (!player.getAbilities().instabuild) {
                 itemStack.shrink(1);
             }

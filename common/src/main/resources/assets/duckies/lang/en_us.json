@@ -1,5 +1,6 @@
 {
-	"item.duckies.bread_crumbs": "Bread Crumbs",
+	"block.duckies.duckweed": "Duckweed",
+	"item.duckies.duckweed": "Duckweed",
 	"item.duckies.duck_spawn_egg": "Duck Spawn Egg",
 	"entity.duckies.duck": "Duck"
 }

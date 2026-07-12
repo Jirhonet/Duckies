@@ -2,6 +2,30 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Build Mods",
+      "command": "./gradlew",
+      "type": "shell",
+      "args": [
+        "build",
+        "copyReleaseJars"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "group": "Mod Development",
+        "panel": "dedicated",
+        "reveal": "always"
+      }
+    },
+    {
       "label": "Minecraft Client (:forge)",
       "command": "./gradlew",
       "type": "shell",

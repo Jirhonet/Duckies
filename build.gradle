@@ -29,7 +29,7 @@ allprojects {
         archivesName = rootProject.archives_base_name
     }
 
-    version = rootProject.mod_version
+    version = "${rootProject.minecraft_version}-${rootProject.mod_version}"
     group = rootProject.maven_group
 
     repositories {
@@ -46,4 +46,12 @@ allprojects {
         }
         withSourcesJar()
     }
+}
+
+tasks.register("copyReleaseJars", Copy) {
+    dependsOn(":fabric:remapJar", ":forge:remapJar")
+
+    from(project(":fabric").tasks.remapJar.outputs.files)
+    from(project(":forge").tasks.remapJar.outputs.files)
+    into(layout.projectDirectory.dir(".output"))
 }

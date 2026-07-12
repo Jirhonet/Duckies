@@ -1,7 +1,7 @@
 package net.jirho.duckies.client.renderer.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 
 import net.jirho.duckies.client.renderer.model.DuckModel;
 import net.jirho.duckies.common.entity.Duck;
@@ -45,8 +45,8 @@ public class DuckHeldItemLayer extends RenderLayer<Duck, DuckModel<Duck>> {
                 (model.heldItem.x - model.head.x) / 16.0F,
                 (heldItemY - model.head.y) / 16.0F,
                 (model.heldItem.z - model.head.z) / 16.0F);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
 
         this.itemInHandRenderer.renderItem(duck, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack,
                 buffer, packedLight);

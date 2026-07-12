@@ -1,5 +1,6 @@
 package net.jirho.duckies.common.worldgen;
 
+import net.minecraft.core.registries.Registries;
 import net.jirho.duckies.common.block.DuckweedBlock;
 import net.jirho.duckies.init.DuckiesRegistries;
 import net.minecraft.core.BlockPos;
@@ -17,13 +18,13 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 
 public class DuckweedFeature extends Feature<NoneFeatureConfiguration> {
     private static final ResourceKey<Biome> RIVER = ResourceKey.create(
-            net.minecraft.core.Registry.BIOME_REGISTRY,
+            Registries.BIOME,
             new ResourceLocation("minecraft:river"));
     private static final ResourceKey<Biome> SWAMP = ResourceKey.create(
-            net.minecraft.core.Registry.BIOME_REGISTRY,
+            Registries.BIOME,
             new ResourceLocation("minecraft:swamp"));
     private static final ResourceKey<Biome> MANGROVE_SWAMP = ResourceKey.create(
-            net.minecraft.core.Registry.BIOME_REGISTRY,
+            Registries.BIOME,
             new ResourceLocation("minecraft:mangrove_swamp"));
     private static final int MAX_SHORE_DISTANCE = 8;
     private static final int RIVER_SURFACE_SEARCH_RANGE = 4;

@@ -7,10 +7,10 @@ import net.jirho.duckies.client.renderer.model.DuckModel;
 import net.jirho.duckies.common.entity.Duck;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 public class DuckHeldItemLayer extends RenderLayer<Duck, DuckModel<Duck>> {
@@ -48,7 +48,7 @@ public class DuckHeldItemLayer extends RenderLayer<Duck, DuckModel<Duck>> {
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
 
-        this.itemInHandRenderer.renderItem(duck, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack,
+        this.itemInHandRenderer.renderItem(duck, itemStack, ItemDisplayContext.GROUND, false, poseStack,
                 buffer, packedLight);
         poseStack.popPose();
     }

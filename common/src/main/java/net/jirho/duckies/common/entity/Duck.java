@@ -342,11 +342,10 @@ public class Duck extends TamableAnimal implements NeutralMob {
     }
 
     private UUID getItemProvider(ItemEntity itemEntity) {
-        UUID thrower = itemEntity.getThrower();
-        if (thrower != null) {
-            return thrower;
+        if (itemEntity.thrower != null) {
+            return itemEntity.thrower;
         }
-        return itemEntity.getOwner();
+        return itemEntity.target;
     }
 
     private void spitOutItem(ItemStack stack) {
@@ -522,7 +521,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
         CraftingContainer container = makeDyeContainer(parentColor, otherColor);
         return this.level.getRecipeManager()
                 .getRecipeFor(RecipeType.CRAFTING, container, this.level)
-                .map(recipe -> recipe.assemble(container))
+                .map(recipe -> recipe.assemble(container, this.level.registryAccess()))
                 .map(ItemStack::getItem)
                 .filter(DyeItem.class::isInstance)
                 .map(DyeItem.class::cast)

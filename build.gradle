@@ -55,3 +55,46 @@ tasks.register("copyReleaseJars", Copy) {
     from(project(":forge").tasks.remapJar.outputs.files)
     into(layout.projectDirectory.dir(".output"))
 }
+
+tasks.register("refreshIdeClean") {
+    dependsOn(":common:clean", ":fabric:clean", ":forge:clean")
+}
+
+tasks.register("refreshIdeSourcesCommon") {
+    dependsOn(":common:genSources", ":common:validateAccessWidener", "refreshIdeClean")
+}
+
+tasks.register("refreshIdeSourcesFabric") {
+    dependsOn(":fabric:genSources", ":fabric:validateAccessWidener", "refreshIdeSourcesCommon")
+}
+
+tasks.register("refreshIdeSourcesForge") {
+    dependsOn(":forge:genSources", ":forge:validateAccessWidener", "refreshIdeSourcesFabric")
+}
+
+tasks.register("refreshIdeCompile") {
+    dependsOn(
+        ":common:compileJava", ":fabric:compileJava", ":forge:compileJava",
+        "refreshIdeSourcesForge"
+    )
+}
+
+tasks.register("refreshIdeEclipse") {
+    dependsOn(
+        ":common:eclipse", ":fabric:eclipse", ":forge:eclipse",
+        "refreshIdeCompile"
+    )
+}
+
+tasks.register("refreshIde") {
+    group = "ide"
+    description = "Clean, regenerate Minecraft sources, validate access wideners, recompile, and refresh IDE classpath files after a version update."
+    dependsOn("refreshIdeEclipse")
+
+    doLast {
+        println ""
+        println "Refresh complete. To clear stale VS Code errors:"
+        println "  1. Command Palette -> 'Java: Clean Java Language Server Workspace'"
+        println "  2. Reload the window when prompted"
+    }
+}

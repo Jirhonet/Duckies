@@ -89,6 +89,59 @@
         }
       },
       "group": "build"
+    },
+    {
+      "label": "Fix VS Code Classpath",
+      "command": "./gradlew",
+      "type": "shell",
+      "args": [
+        ":common:eclipse",
+        ":fabric:eclipse",
+        ":forge:eclipse"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+        }
+      },
+      "group": "build",
+      "detail": "Regenerates .classpath files so VS Code picks up the current Minecraft version. Then run 'Java: Clean Java Language Server Workspace' and reload.",
+      "presentation": {
+        "group": "Mod Development",
+        "panel": "dedicated",
+        "reveal": "always",
+        "focus": true
+      },
+      "problemMatcher": [
+        "$gradle"
+      ]
+    },
+    {
+      "label": "Refresh IDE After Version Update",
+      "command": "bash",
+      "type": "shell",
+      "args": [
+        "-c",
+        "./gradlew --refresh-dependencies help --quiet && ./gradlew --no-parallel refreshIde"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+        }
+      },
+      "group": "build",
+      "detail": "Run after changing minecraft_version in gradle.properties. Refreshes deps, regenerates Minecraft sources, recompiles, and updates IDE classpath files. Then run 'Java: Clean Java Language Server Workspace' and reload.",
+      "presentation": {
+        "group": "Mod Development",
+        "panel": "dedicated",
+        "reveal": "always",
+        "focus": true
+      },
+      "problemMatcher": [
+        "$gradle"
+      ]
     }
   ]
 }

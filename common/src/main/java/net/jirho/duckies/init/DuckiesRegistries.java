@@ -21,7 +21,8 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 
 public final class DuckiesRegistries {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Duckies.MOD_ID, Registries.BLOCK);
@@ -31,7 +32,9 @@ public final class DuckiesRegistries {
     public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(Duckies.MOD_ID, Registries.FEATURE);
 
     public static final RegistrySupplier<Block> DUCKWEED = BLOCKS.register("duckweed", () ->
-            new DuckweedBlock(BlockBehaviour.Properties.of(Material.PLANT)
+            new DuckweedBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.PLANT)
+                    .pushReaction(PushReaction.DESTROY)
                     .noCollission()
                     .instabreak()
                     .sound(SoundType.GRASS)));

@@ -111,7 +111,7 @@ public class DuckModel<T extends Duck> extends AgeableListModel<T> {
     }
 
     private boolean isFalling(T entity) {
-        return !entity.isOnGround()
+        return !entity.onGround()
                 && !entity.isInSittingPose();
     }
 }

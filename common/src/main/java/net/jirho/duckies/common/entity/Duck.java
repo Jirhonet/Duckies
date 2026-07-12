@@ -62,7 +62,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
@@ -135,7 +135,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
         if (tag.contains("Color", 99)) {
             this.setColor(DyeColor.byId(tag.getInt("Color")));
         }
-        this.readPersistentAngerSaveData(this.level, tag);
+        this.readPersistentAngerSaveData(this.level(), tag);
     }
 
     @Override
@@ -156,8 +156,8 @@ public class Duck extends TamableAnimal implements NeutralMob {
     @Override
     public void tick() {
         super.tick();
-        if (!this.level.isClientSide) {
-            this.updatePersistentAnger((ServerLevel) this.level, true);
+        if (!this.level().isClientSide) {
+            this.updatePersistentAnger((ServerLevel) this.level(), true);
             ++this.ticksSinceEaten;
             this.tryConsumeHeldItem();
         }
@@ -166,7 +166,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (!this.onGround) {
+        if (!this.onGround()) {
             Vec3 movement = this.getDeltaMovement();
             if (movement.y < 0.0D) {
                 this.setDeltaMovement(movement.multiply(1.0D, 0.6D, 1.0D));
@@ -279,7 +279,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
                 this.addEffect(new MobEffectInstance(effect));
             }
         }
-        if (this.consumableProvider != null && this.level instanceof ServerLevel serverLevel) {
+        if (this.consumableProvider != null && this.level() instanceof ServerLevel serverLevel) {
             Player player = serverLevel.getPlayerByUUID(this.consumableProvider);
             if (player instanceof ServerPlayer serverPlayer) {
                 DuckiesAdvancements.grant(serverPlayer, DuckiesAdvancements.LEMONADE_STAND, "fed_potion");
@@ -290,7 +290,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
     }
 
     private void spawnEatParticles(ItemStack stack) {
-        if (this.level instanceof ServerLevel serverLevel) {
+        if (this.level() instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(
                     new ItemParticleOption(ParticleTypes.ITEM, stack),
                     this.getX(),
@@ -328,7 +328,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
         this.ticksSinceEaten = 0;
 
         UUID provider = this.getItemProvider(itemEntity);
-        if (provider != null && this.level instanceof ServerLevel serverLevel) {
+        if (provider != null && this.level() instanceof ServerLevel serverLevel) {
             Player player = serverLevel.getPlayerByUUID(provider);
             if (player instanceof ServerPlayer serverPlayer) {
                 if (pickedUpItem.getItem() instanceof SwordItem) {
@@ -349,7 +349,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
     }
 
     private void spitOutItem(ItemStack stack) {
-        if (stack.isEmpty() || this.level.isClientSide) {
+        if (stack.isEmpty() || this.level().isClientSide) {
             return;
         }
 
@@ -357,17 +357,17 @@ public class Duck extends TamableAnimal implements NeutralMob {
             this.consumableProvider = null;
         }
 
-        ItemEntity itemEntity = new ItemEntity(this.level, this.getX() + this.getLookAngle().x, this.getY() + 1.0D,
+        ItemEntity itemEntity = new ItemEntity(this.level(), this.getX() + this.getLookAngle().x, this.getY() + 1.0D,
                 this.getZ() + this.getLookAngle().z, stack);
         itemEntity.setPickUpDelay(40);
         itemEntity.setThrower(this.getUUID());
         this.playSound(SoundEvents.FOX_SPIT, 1.0F, 1.0F);
-        this.level.addFreshEntity(itemEntity);
+        this.level().addFreshEntity(itemEntity);
     }
 
     private void dropItemStack(ItemStack stack) {
-        ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), stack);
-        this.level.addFreshEntity(itemEntity);
+        ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), stack);
+        this.level().addFreshEntity(itemEntity);
     }
 
     @Override
@@ -408,7 +408,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
-        if (this.level.isClientSide) {
+        if (this.level().isClientSide) {
             if ((this.isFood(itemStack) || this.isDuckEdible(itemStack)) && this.getHealth() < this.getMaxHealth()) {
                 return InteractionResult.CONSUME;
             }
@@ -462,9 +462,9 @@ public class Duck extends TamableAnimal implements NeutralMob {
                 this.navigation.stop();
                 this.setTarget(null);
                 this.setOrderedToSit(true);
-                this.level.broadcastEntityEvent(this, (byte) 7);
+                this.level().broadcastEntityEvent(this, (byte) 7);
             } else {
-                this.level.broadcastEntityEvent(this, (byte) 6);
+                this.level().broadcastEntityEvent(this, (byte) 6);
             }
             return InteractionResult.SUCCESS;
         }
@@ -482,7 +482,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             this.setOrderedToSit(false);
         }
         return super.hurt(source, amount);
@@ -518,10 +518,10 @@ public class Duck extends TamableAnimal implements NeutralMob {
     private DyeColor getOffspringColor(Duck otherParent) {
         DyeColor parentColor = this.getColor();
         DyeColor otherColor = otherParent.getColor();
-        CraftingContainer container = makeDyeContainer(parentColor, otherColor);
-        return this.level.getRecipeManager()
-                .getRecipeFor(RecipeType.CRAFTING, container, this.level)
-                .map(recipe -> recipe.assemble(container, this.level.registryAccess()))
+        TransientCraftingContainer container = makeDyeContainer(parentColor, otherColor);
+        return this.level().getRecipeManager()
+                .getRecipeFor(RecipeType.CRAFTING, container, this.level())
+                .map(recipe -> recipe.assemble(container, this.level().registryAccess()))
                 .map(ItemStack::getItem)
                 .filter(DyeItem.class::isInstance)
                 .map(DyeItem.class::cast)
@@ -529,8 +529,8 @@ public class Duck extends TamableAnimal implements NeutralMob {
                 .orElseGet(() -> this.random.nextBoolean() ? parentColor : otherColor);
     }
 
-    private static CraftingContainer makeDyeContainer(DyeColor first, DyeColor second) {
-        CraftingContainer container = new CraftingContainer(new AbstractContainerMenu(null, -1) {
+    private static TransientCraftingContainer makeDyeContainer(DyeColor first, DyeColor second) {
+        TransientCraftingContainer container = new TransientCraftingContainer(new AbstractContainerMenu(null, -1) {
             @Override
             public ItemStack quickMoveStack(Player player, int slot) {
                 return ItemStack.EMPTY;

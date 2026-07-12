@@ -22,6 +22,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.WaterlilyBlock;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -29,9 +30,8 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.pathfinder.PathComputationType;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -67,7 +67,7 @@ public class DuckweedBlock extends WaterlilyBlock implements BonemealableBlock {
         }
 
         FluidState fluidState = blockGetter.getFluidState(blockPos);
-        if (fluidState.getType() == Fluids.WATER || blockState.getMaterial() == Material.ICE) {
+        if (fluidState.getType() == Fluids.WATER || blockState.is(Blocks.ICE) || blockState.is(Blocks.FROSTED_ICE)) {
             return true;
         }
 
@@ -154,7 +154,7 @@ public class DuckweedBlock extends WaterlilyBlock implements BonemealableBlock {
         return !context.isSecondaryUseActive()
                 && context.getItemInHand().is(this.asItem())
                 && state.getValue(FLOWER_AMOUNT) < MAX_AMOUNT
-                || this.material.isReplaceable()
+                || state.canBeReplaced()
                         && (context.getItemInHand().isEmpty() || !context.getItemInHand().is(this.asItem()));
     }
 
@@ -240,7 +240,7 @@ public class DuckweedBlock extends WaterlilyBlock implements BonemealableBlock {
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         return Collections.singletonList(new ItemStack(this.asItem(), state.getValue(FLOWER_AMOUNT)));
     }
 

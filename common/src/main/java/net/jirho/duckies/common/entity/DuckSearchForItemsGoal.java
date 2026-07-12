@@ -68,7 +68,7 @@ public class DuckSearchForItemsGoal extends Goal {
 
     private List<ItemEntity> findNearbyItems() {
         AABB searchArea = this.duck.getBoundingBox().inflate(8.0D, 8.0D, 8.0D);
-        return this.duck.level.getEntitiesOfClass(ItemEntity.class, searchArea, ALLOWED_ITEMS).stream()
+        return this.duck.level().getEntitiesOfClass(ItemEntity.class, searchArea, ALLOWED_ITEMS).stream()
                 .filter(itemEntity -> this.duck.canHoldItem(itemEntity.getItem()))
                 .sorted(Comparator.comparingInt((ItemEntity itemEntity) -> this.duck.getPickupPriority(itemEntity.getItem()))
                         .reversed()

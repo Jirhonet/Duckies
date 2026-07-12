@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -17,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.WaterlilyBlock;
@@ -59,8 +61,8 @@ public class DuckweedBlock extends WaterlilyBlock implements BonemealableBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        FluidState fluidAbove = blockGetter.getFluidState(blockPos.above());
-        if (fluidAbove.getType() != Fluids.EMPTY) {
+        FluidState fluidAtPlacement = blockGetter.getFluidState(blockPos.above());
+        if (fluidAtPlacement.getType() != Fluids.EMPTY) {
             return false;
         }
 
@@ -73,9 +75,64 @@ public class DuckweedBlock extends WaterlilyBlock implements BonemealableBlock {
     }
 
     @Override
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+        if (level.getFluidState(pos).getType() == Fluids.WATER) {
+            return false;
+        }
+
+        return super.canSurvive(state, level, pos);
+    }
+
+    public static BlockPos findWaterColumnSurface(BlockGetter level, BlockPos waterPos) {
+        if (!level.getFluidState(waterPos).is(FluidTags.WATER)) {
+            return null;
+        }
+
+        BlockPos surface = waterPos;
+        while (level.getFluidState(surface.above()).is(FluidTags.WATER)) {
+            surface = surface.above();
+        }
+
+        return surface;
+    }
+
+    public static BlockPlaceContext adjustPlacementContext(BlockPlaceContext context) {
+        Level level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        BlockState existing = level.getBlockState(pos);
+
+        if (existing.getBlock() instanceof DuckweedBlock) {
+            return context;
+        }
+
+        if (level.getFluidState(pos).is(FluidTags.WATER)) {
+            BlockPos surface = findWaterColumnSurface(level, pos);
+            if (surface == null) {
+                return null;
+            }
+
+            BlockPos above = surface.above();
+            if (level.getBlockState(above).canBeReplaced(context)) {
+                return BlockPlaceContext.at(context, above, Direction.DOWN);
+            }
+            return null;
+        }
+
+        if (!level.getFluidState(pos).isEmpty()) {
+            return null;
+        }
+
+        return context;
+    }
+
+    @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
+
+        if (level.getFluidState(pos).getType() == Fluids.WATER) {
+            return null;
+        }
 
         BlockState existing = level.getBlockState(pos);
         if (existing.is(this)) {

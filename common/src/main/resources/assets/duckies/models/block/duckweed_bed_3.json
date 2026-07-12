@@ -5,8 +5,8 @@
 	},
 	"elements": [
 		{
-			"from": [8, 1, 8],
-			"to": [16, 1, 16],
+			"from": [8, 0.25, 8],
+			"to": [16, 0.25, 16],
 			"faces": {
 				"up": { "uv": [8, 8, 16, 16], "texture": "#duckweed", "tintindex": 0 },
 				"down": { "uv": [8, 16, 16, 8], "texture": "#duckweed", "tintindex": 0 }

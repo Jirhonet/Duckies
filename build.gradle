@@ -33,6 +33,7 @@ allprojects {
     group = rootProject.maven_group
 
     repositories {
+        maven { url "https://maven.neoforged.net/releases/" }
     }
 
     tasks.withType(JavaCompile) {
@@ -49,15 +50,16 @@ allprojects {
 }
 
 tasks.register("copyReleaseJars", Copy) {
-    dependsOn(":fabric:remapJar", ":forge:remapJar")
+    dependsOn(":fabric:remapJar", ":forge:remapJar", ":neoforge:remapJar")
 
     from(project(":fabric").tasks.remapJar.outputs.files)
     from(project(":forge").tasks.remapJar.outputs.files)
+    from(project(":neoforge").tasks.remapJar.outputs.files)
     into(layout.projectDirectory.dir(".output"))
 }
 
 tasks.register("refreshIdeClean") {
-    dependsOn(":common:clean", ":fabric:clean", ":forge:clean")
+    dependsOn(":common:clean", ":fabric:clean", ":forge:clean", ":neoforge:clean")
 }
 
 tasks.register("refreshIdeSourcesCommon") {
@@ -72,16 +74,20 @@ tasks.register("refreshIdeSourcesForge") {
     dependsOn(":forge:genSources", ":forge:validateAccessWidener", "refreshIdeSourcesFabric")
 }
 
+tasks.register("refreshIdeSourcesNeoForge") {
+    dependsOn(":neoforge:genSources", ":neoforge:validateAccessWidener", "refreshIdeSourcesForge")
+}
+
 tasks.register("refreshIdeCompile") {
     dependsOn(
-        ":common:compileJava", ":fabric:compileJava", ":forge:compileJava",
-        "refreshIdeSourcesForge"
+        ":common:compileJava", ":fabric:compileJava", ":forge:compileJava", ":neoforge:compileJava",
+        "refreshIdeSourcesNeoForge"
     )
 }
 
 tasks.register("refreshIdeEclipse") {
     dependsOn(
-        ":common:eclipse", ":fabric:eclipse", ":forge:eclipse",
+        ":common:eclipse", ":fabric:eclipse", ":forge:eclipse", ":neoforge:eclipse",
         "refreshIdeCompile"
     )
 }

@@ -1,6 +1,7 @@
 package net.jirho.duckies;
 
 import dev.architectury.event.events.common.LifecycleEvent;
+import dev.architectury.platform.Platform;
 import dev.architectury.registry.level.biome.BiomeModifications;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
@@ -33,16 +34,18 @@ public final class Duckies {
             );
         });
 
-        BiomeModifications.addProperties(
-                (ctx, mutable) -> {
-                    if (ctx.getKey().map(key -> key.equals(new ResourceLocation("minecraft:river"))).orElse(false)) {
-                        mutable.getSpawnProperties().addSpawn(
-                                net.minecraft.world.entity.MobCategory.CREATURE,
-                                new MobSpawnSettings.SpawnerData(DuckiesRegistries.DUCK.get(), 20, 2, 7)
-                        );
+        if (!Platform.isNeoForge()) {
+            BiomeModifications.addProperties(
+                    (ctx, mutable) -> {
+                        if (ctx.getKey().map(key -> key.equals(new ResourceLocation("minecraft:river"))).orElse(false)) {
+                            mutable.getSpawnProperties().addSpawn(
+                                    net.minecraft.world.entity.MobCategory.CREATURE,
+                                    new MobSpawnSettings.SpawnerData(DuckiesRegistries.DUCK.get(), 20, 2, 7)
+                            );
+                        }
                     }
-                }
-        );
+            );
+        }
 
         EnvExecutor.runInEnv(Env.CLIENT, () -> DuckiesClient::init);
     }

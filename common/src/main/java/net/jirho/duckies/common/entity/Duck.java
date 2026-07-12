@@ -521,7 +521,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
         TransientCraftingContainer container = makeDyeContainer(parentColor, otherColor);
         return this.level().getRecipeManager()
                 .getRecipeFor(RecipeType.CRAFTING, container, this.level())
-                .map(recipe -> recipe.assemble(container, this.level().registryAccess()))
+                .map(recipe -> recipe.value().assemble(container, this.level().registryAccess()))
                 .map(ItemStack::getItem)
                 .filter(DyeItem.class::isInstance)
                 .map(DyeItem.class::cast)

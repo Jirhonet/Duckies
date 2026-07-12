@@ -43,6 +43,26 @@
       }
     },
     {
+      "label": "Minecraft Client (:neoforge)",
+      "command": "./gradlew",
+      "type": "shell",
+      "args": [
+        ":neoforge:runClient"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+        }
+      },
+      "group": "build",
+      "presentation": {
+        "group": "Mod Development",
+        "panel": "dedicated",
+        "reveal": "always"
+      }
+    },
+    {
       "label": "Minecraft Client (:fabric)",
       "command": "./gradlew",
       "type": "shell",
@@ -77,6 +97,20 @@
       "group": "build"
     },
     {
+      "label": "Build NeoForge",
+      "command": "./gradlew",
+      "type": "shell",
+      "args": [
+        ":neoforge:build"
+      ],
+      "options": {
+        "env": {
+          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+        }
+      },
+      "group": "build"
+    },
+    {
       "label": "Build Fabric",
       "command": "./gradlew",
       "type": "shell",
@@ -97,7 +131,8 @@
       "args": [
         ":common:eclipse",
         ":fabric:eclipse",
-        ":forge:eclipse"
+        ":forge:eclipse",
+        ":neoforge:eclipse"
       ],
       "options": {
         "cwd": "${workspaceFolder}",

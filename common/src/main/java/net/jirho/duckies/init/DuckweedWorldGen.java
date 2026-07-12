@@ -1,5 +1,6 @@
 package net.jirho.duckies.init;
 
+import dev.architectury.platform.Platform;
 import dev.architectury.registry.level.biome.BiomeModifications;
 import net.jirho.duckies.Duckies;
 import net.minecraft.core.registries.Registries;
@@ -20,6 +21,10 @@ public final class DuckweedWorldGen {
     }
 
     public static void init() {
+        if (Platform.isNeoForge()) {
+            return;
+        }
+
         BiomeModifications.addProperties((ctx, mutable) -> {
             ctx.getKey().ifPresent(key -> {
                 if (key.equals(new ResourceLocation("minecraft:river"))) {

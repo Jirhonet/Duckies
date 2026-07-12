@@ -1,7 +1,7 @@
 package net.jirho.duckies.common.advancement;
 
 import net.jirho.duckies.Duckies;
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -16,7 +16,7 @@ public final class DuckiesAdvancements {
     }
 
     public static void grant(ServerPlayer player, ResourceLocation advancementId, String criterion) {
-        Advancement advancement = player.server.getAdvancements().getAdvancement(advancementId);
+        AdvancementHolder advancement = player.server.getAdvancements().get(advancementId);
         if (advancement != null) {
             player.getAdvancements().award(advancement, criterion);
         }

@@ -20,6 +20,16 @@
       "env": {
         "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
       }
+    },
+    {
+      "type": "node-terminal",
+      "name": "Minecraft Client (:neoforge)",
+      "request": "launch",
+      "command": "./gradlew :neoforge:runClient",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+      }
     }
   ]
 }

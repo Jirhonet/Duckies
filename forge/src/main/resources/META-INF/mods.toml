@@ -6,6 +6,7 @@ license = "MIT"
 modId = "duckies"
 version = "${version}"
 displayName = "Duckies"
+logoFile = "logo.png"
 authors = "Jirho"
 description = '''
 A mod that adds ducks and stuff.

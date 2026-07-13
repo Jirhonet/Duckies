@@ -9,6 +9,7 @@ run/
 remappedSrc/
 forge/run/
 fabric/run/
+debug.log
 
 # eclipse
 

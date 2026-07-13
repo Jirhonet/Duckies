@@ -60,6 +60,22 @@ tasks.processResources.configure {
     }
 }
 
+// Forge 49+ uses JPMS module layers. Architectury injects a transformed copy of the
+// common dev jar at runtime, but Loom also leaves the original dev jar on the classpath,
+// which causes a ResolutionException during "scanning mod candidates".
+afterEvaluate {
+    def stripCommonDevJar = { path ->
+        def text = path.toString()
+        !text.contains("/common/build/devlibs/") && !text.contains("\\common\\build\\devlibs\\")
+    }
+
+    ["runClient", "runServer"].each { runTask ->
+        tasks.named(runTask).configure {
+            classpath = classpath.filter(stripCommonDevJar)
+        }
+    }
+}
+
 shadowJar {
     exclude "fabric.mod.json"
     exclude "architectury.common.json"

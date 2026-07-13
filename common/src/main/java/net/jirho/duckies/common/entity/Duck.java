@@ -360,7 +360,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
         ItemEntity itemEntity = new ItemEntity(this.level(), this.getX() + this.getLookAngle().x, this.getY() + 1.0D,
                 this.getZ() + this.getLookAngle().z, stack);
         itemEntity.setPickUpDelay(40);
-        itemEntity.setThrower(this.getUUID());
+        itemEntity.setThrower(this);
         this.playSound(SoundEvents.FOX_SPIT, 1.0F, 1.0F);
         this.level().addFreshEntity(itemEntity);
     }

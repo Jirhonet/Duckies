@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[48,)"
+loaderVersion = "[49,)"
 license = "MIT"
 
 [[mods]]
@@ -15,20 +15,20 @@ A mod that adds ducks and stuff.
 [[dependencies.duckies]]
 modId = "forge"
 mandatory = true
-versionRange = "[48,)"
+versionRange = "[49,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.duckies]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.20.2,)"
+versionRange = "[1.20.3,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.duckies]]
 modId = "architectury"
 mandatory = true
-versionRange = "[10.1.20,)"
+versionRange = "[11.0.6,)"
 ordering = "AFTER"
 side = "BOTH"

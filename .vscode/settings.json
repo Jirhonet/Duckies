@@ -2,13 +2,13 @@
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.import.gradle.enabled": true,
   "java.import.gradle.wrapper.enabled": true,
-  "java.import.gradle.version": "8.4",
-  "java.import.gradle.java.home": "/usr/lib/jvm/java-17-openjdk",
-  "java.jdt.ls.java.home": "/usr/lib/jvm/java-17-openjdk",
+  "java.import.gradle.version": "8.8",
+  "java.import.gradle.java.home": "/usr/lib/jvm/java-21-openjdk",
+  "java.jdt.ls.java.home": "/usr/lib/jvm/java-21-openjdk",
   "java.configuration.runtimes": [
     {
-      "name": "JavaSE-17",
-      "path": "/usr/lib/jvm/java-17-openjdk",
+      "name": "JavaSE-21",
+      "path": "/usr/lib/jvm/java-21-openjdk",
       "default": true
     }
   ],

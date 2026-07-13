@@ -2,7 +2,8 @@
   "parent": "duckies:i_love_you",
   "display": {
     "icon": {
-      "item": "minecraft:golden_sword"
+      "id": "minecraft:golden_sword",
+      "count": 1
     },
     "title": {
       "translate": "advancements.duckies.peace_was_never_an_option.title"

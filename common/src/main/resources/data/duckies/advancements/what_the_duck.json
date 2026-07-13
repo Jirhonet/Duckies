@@ -2,7 +2,8 @@
   "parent": "minecraft:husbandry/root",
   "display": {
     "icon": {
-      "item": "minecraft:feather"
+      "id": "minecraft:feather",
+      "count": 1
     },
     "title": {
       "translate": "advancements.duckies.what_the_duck.title"

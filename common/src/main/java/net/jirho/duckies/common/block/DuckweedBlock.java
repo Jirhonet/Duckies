@@ -11,7 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -159,9 +159,8 @@ public class DuckweedBlock extends WaterlilyBlock implements BonemealableBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
-            BlockHitResult hit) {
-        ItemStack stack = player.getItemInHand(hand);
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+            Player player, InteractionHand hand, BlockHitResult hit) {
         if (stack.is(this.asItem()) && state.getValue(FLOWER_AMOUNT) < MAX_AMOUNT) {
             if (!level.isClientSide) {
                 level.setBlock(pos, state.setValue(FLOWER_AMOUNT, state.getValue(FLOWER_AMOUNT) + 1), 3);
@@ -170,10 +169,10 @@ public class DuckweedBlock extends WaterlilyBlock implements BonemealableBlock {
                     stack.shrink(1);
                 }
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        return InteractionResult.PASS;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
@@ -235,7 +234,7 @@ public class DuckweedBlock extends WaterlilyBlock implements BonemealableBlock {
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+    protected boolean isPathfindable(BlockState state, PathComputationType type) {
         return type == PathComputationType.AIR && !this.hasCollision;
     }
 

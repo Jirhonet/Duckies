@@ -6,12 +6,15 @@ import net.jirho.duckies.common.advancement.DuckiesAdvancements;
 import net.jirho.duckies.init.DuckiesRegistries;
 import net.jirho.duckies.init.DuckiesTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,7 +34,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.Pose;
@@ -60,7 +62,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -68,7 +70,8 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.Vec3;
 
 public class Duck extends TamableAnimal implements NeutralMob {
@@ -87,7 +90,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
 
     public Duck(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
-        this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+        this.setPathfindingMalus(PathType.WATER, 0.0F);
         this.setCanPickUpLoot(true);
     }
 
@@ -139,10 +142,11 @@ public class Duck extends TamableAnimal implements NeutralMob {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(DATA_COLOR, DyeColor.RED.getId());
-        this.entityData.define(DATA_REMAINING_ANGER_TIME, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_COLOR, DyeColor.RED.getId());
+        builder.define(DATA_REMAINING_ANGER_TIME, 0);
+        builder.define(DATA_SUFFOCATING, false);
     }
 
     public DyeColor getColor() {
@@ -225,7 +229,8 @@ public class Duck extends TamableAnimal implements NeutralMob {
     }
 
     private boolean hasEffectivePotionEffects(ItemStack stack) {
-        return !PotionUtils.getMobEffects(stack).isEmpty();
+        PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
+        return contents != null && contents.hasEffects();
     }
 
     public boolean isHoldingConsumable() {
@@ -272,11 +277,14 @@ public class Duck extends TamableAnimal implements NeutralMob {
         ItemStack drunkItem = heldItem.copy();
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GLASS_BOTTLE));
         this.playSound(SoundEvents.GENERIC_DRINK, 1.0F, 1.0F);
-        for (MobEffectInstance effect : PotionUtils.getMobEffects(drunkItem)) {
-            if (effect.getEffect().isInstantenous()) {
-                effect.getEffect().applyInstantenousEffect(this, this, this, effect.getAmplifier(), 1.0D);
-            } else {
-                this.addEffect(new MobEffectInstance(effect));
+        PotionContents contents = drunkItem.get(DataComponents.POTION_CONTENTS);
+        if (contents != null) {
+            for (MobEffectInstance effect : contents.getAllEffects()) {
+                if (effect.getEffect().value().isInstantenous()) {
+                    effect.getEffect().value().applyInstantenousEffect(this, this, this, effect.getAmplifier(), 1.0D);
+                } else {
+                    this.addEffect(new MobEffectInstance(effect));
+                }
             }
         }
         if (this.consumableProvider != null && this.level() instanceof ServerLevel serverLevel) {
@@ -377,11 +385,6 @@ public class Duck extends TamableAnimal implements NeutralMob {
 
     public void setSuffocating(boolean suffocating) {
         this.entityData.set(DATA_SUFFOCATING, suffocating);
-    }
-
-    @Override
-    public MobType getMobType() {
-        return MobType.UNDEFINED;
     }
 
     @Override
@@ -499,8 +502,9 @@ public class Duck extends TamableAnimal implements NeutralMob {
     }
 
     @Override
-    protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
-        return this.isBaby() ? dimensions.height * 0.85F : dimensions.height * 0.92F;
+    public EntityDimensions getDefaultDimensions(Pose pose) {
+        EntityDimensions dimensions = super.getDefaultDimensions(pose);
+        return dimensions.withEyeHeight(dimensions.height() * (this.isBaby() ? 0.85F : 0.92F));
     }
 
     @Override
@@ -509,7 +513,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
         UUID owner = this.getOwnerUUID();
         if (owner != null) {
             duck.setOwnerUUID(owner);
-            duck.setTame(true);
+            duck.setTame(true, true);
         }
         duck.setColor(this.getOffspringColor((Duck) parent));
         return duck;
@@ -576,8 +580,8 @@ public class Duck extends TamableAnimal implements NeutralMob {
     }
 
     @Override
-    public ResourceLocation getDefaultLootTable() {
-        return new ResourceLocation("duckies", "entities/duck");
+    public ResourceKey<LootTable> getDefaultLootTable() {
+        return ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation("duckies", "entities/duck"));
     }
 
     @Override

@@ -12,27 +12,7 @@
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {
-          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
-        }
-      },
-      "group": "build",
-      "presentation": {
-        "group": "Mod Development",
-        "panel": "dedicated",
-        "reveal": "always"
-      }
-    },
-    {
-      "label": "Minecraft Client (:forge)",
-      "command": "./gradlew",
-      "type": "shell",
-      "args": [
-        ":forge:runClient"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}",
-        "env": {
-          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+          "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk"
         }
       },
       "group": "build",
@@ -52,7 +32,7 @@
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {
-          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+          "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk"
         }
       },
       "group": "build",
@@ -72,7 +52,7 @@
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {
-          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+          "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk"
         }
       },
       "group": "build",
@@ -83,20 +63,6 @@
       }
     },
     {
-      "label": "Build Forge",
-      "command": "./gradlew",
-      "type": "shell",
-      "args": [
-        ":forge:build"
-      ],
-      "options": {
-        "env": {
-          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
-        }
-      },
-      "group": "build"
-    },
-    {
       "label": "Build NeoForge",
       "command": "./gradlew",
       "type": "shell",
@@ -105,7 +71,7 @@
       ],
       "options": {
         "env": {
-          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+          "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk"
         }
       },
       "group": "build"
@@ -119,7 +85,7 @@
       ],
       "options": {
         "env": {
-          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+          "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk"
         }
       },
       "group": "build"
@@ -131,13 +97,12 @@
       "args": [
         ":common:eclipse",
         ":fabric:eclipse",
-        ":forge:eclipse",
         ":neoforge:eclipse"
       ],
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {
-          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+          "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk"
         }
       },
       "group": "build",
@@ -163,7 +128,7 @@
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {
-          "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+          "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk"
         }
       },
       "group": "build",

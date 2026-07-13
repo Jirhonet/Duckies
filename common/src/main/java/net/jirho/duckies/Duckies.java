@@ -10,8 +10,8 @@ import net.jirho.duckies.common.entity.Duck;
 import net.jirho.duckies.init.DuckiesRegistries;
 import net.jirho.duckies.init.DuckweedWorldGen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.SpawnPlacements;
-import net.minecraft.world.entity.SpawnPlacements.Type;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
@@ -28,7 +28,7 @@ public final class Duckies {
         LifecycleEvent.SETUP.register(() -> {
             SpawnPlacements.register(
                     DuckiesRegistries.DUCK.get(),
-                    Type.ON_GROUND,
+                    SpawnPlacementTypes.ON_GROUND,
                     Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     Duck::canSpawn
             );

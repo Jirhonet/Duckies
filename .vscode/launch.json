@@ -8,17 +8,7 @@
       "command": "./gradlew :fabric:runClient",
       "cwd": "${workspaceFolder}",
       "env": {
-        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
-      }
-    },
-    {
-      "type": "node-terminal",
-      "name": "Minecraft Client (:forge)",
-      "request": "launch",
-      "command": "./gradlew :forge:runClient",
-      "cwd": "${workspaceFolder}",
-      "env": {
-        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+        "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk"
       }
     },
     {
@@ -28,7 +18,7 @@
       "command": "./gradlew :neoforge:runClient",
       "cwd": "${workspaceFolder}",
       "env": {
-        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk"
+        "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk"
       }
     }
   ]

@@ -7,8 +7,8 @@ out/
 classes/
 run/
 remappedSrc/
-forge/run/
 fabric/run/
+neoforge/run/
 debug.log
 
 # eclipse

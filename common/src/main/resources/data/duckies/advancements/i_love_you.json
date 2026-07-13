@@ -2,7 +2,8 @@
   "parent": "duckies:what_the_duck",
   "display": {
     "icon": {
-      "item": "duckies:duckweed"
+      "id": "duckies:duckweed",
+      "count": 1
     },
     "title": {
       "translate": "advancements.duckies.i_love_you.title"

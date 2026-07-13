@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.5-SNAPSHOT"
-    id "dev.architectury.loom" version "1.5-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
 }
 
 architectury {
@@ -38,28 +38,27 @@ allprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
-        options.release = 17
+        options.release = 21
     }
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
+            languageVersion = JavaLanguageVersion.of(21)
         }
         withSourcesJar()
     }
 }
 
 tasks.register("copyReleaseJars", Copy) {
-    dependsOn(":fabric:remapJar", ":forge:remapJar", ":neoforge:remapJar")
+    dependsOn(":fabric:remapJar", ":neoforge:remapJar")
 
     from(project(":fabric").tasks.remapJar.outputs.files)
-    from(project(":forge").tasks.remapJar.outputs.files)
     from(project(":neoforge").tasks.remapJar.outputs.files)
     into(layout.projectDirectory.dir(".output"))
 }
 
 tasks.register("refreshIdeClean") {
-    dependsOn(":common:clean", ":fabric:clean", ":forge:clean", ":neoforge:clean")
+    dependsOn(":common:clean", ":fabric:clean", ":neoforge:clean")
 }
 
 tasks.register("refreshIdeSourcesCommon") {
@@ -70,24 +69,20 @@ tasks.register("refreshIdeSourcesFabric") {
     dependsOn(":fabric:genSources", ":fabric:validateAccessWidener", "refreshIdeSourcesCommon")
 }
 
-tasks.register("refreshIdeSourcesForge") {
-    dependsOn(":forge:genSources", ":forge:validateAccessWidener", "refreshIdeSourcesFabric")
-}
-
 tasks.register("refreshIdeSourcesNeoForge") {
-    dependsOn(":neoforge:genSources", ":neoforge:validateAccessWidener", "refreshIdeSourcesForge")
+    dependsOn(":neoforge:genSources", ":neoforge:validateAccessWidener", "refreshIdeSourcesFabric")
 }
 
 tasks.register("refreshIdeCompile") {
     dependsOn(
-        ":common:compileJava", ":fabric:compileJava", ":forge:compileJava", ":neoforge:compileJava",
+        ":common:compileJava", ":fabric:compileJava", ":neoforge:compileJava",
         "refreshIdeSourcesNeoForge"
     )
 }
 
 tasks.register("refreshIdeEclipse") {
     dependsOn(
-        ":common:eclipse", ":fabric:eclipse", ":forge:eclipse", ":neoforge:eclipse",
+        ":common:eclipse", ":fabric:eclipse", ":neoforge:eclipse",
         "refreshIdeCompile"
     )
 }

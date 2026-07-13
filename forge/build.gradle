@@ -40,6 +40,18 @@ processResources {
     filesMatching("META-INF/mods.toml") {
         expand "version": project.version
     }
+
+    // Forge 49+ derives JPMS module names from Automatic-Module-Name; without it mod discovery crashes.
+    doLast {
+        def manifest = java.nio.file.Path.of(outputs.files.asPath).resolve("META-INF/MANIFEST.MF")
+        manifest.text = "Manifest-Version: 1.0\nAutomatic-Module-Name: ${rootProject.archives_base_name}\n"
+    }
+}
+
+tasks.named("jar", Jar) {
+    manifest {
+        attributes "Automatic-Module-Name": rootProject.archives_base_name
+    }
 }
 
 // Eclipse/VS Code compile resources into bin/main without running processResources,
@@ -62,16 +74,35 @@ tasks.processResources.configure {
 
 // Forge 49+ uses JPMS module layers. Architectury injects a transformed copy of the
 // common dev jar at runtime, but Loom also leaves the original dev jar on the classpath,
-// which causes a ResolutionException during "scanning mod candidates".
+// which causes a ResolutionException during "scanning mod candidates". Exploded forge
+// output directories are also scanned as separate mods alongside the forge dev jar.
 afterEvaluate {
-    def stripCommonDevJar = { path ->
-        def text = path.toString()
-        !text.contains("/common/build/devlibs/") && !text.contains("\\common\\build\\devlibs\\")
+    def commonDevlibs = project(":common").layout.buildDirectory.dir("devlibs").get().asFile
+    def forgeBuild = layout.buildDirectory.get().asFile
+    def forgeBinMain = layout.projectDirectory.dir("bin/main").asFile
+
+    def keepOnForgeClasspath = { file ->
+        def path = file.toPath().toAbsolutePath().normalize()
+        if (path.startsWith(commonDevlibs.toPath().toAbsolutePath().normalize())) {
+            return false
+        }
+        def forgeBuildPath = forgeBuild.toPath().toAbsolutePath().normalize()
+        if (path.startsWith(forgeBuildPath)) {
+            def relative = forgeBuildPath.relativize(path).toString().replace('\\', '/')
+            if (relative.startsWith("classes/") || relative.startsWith("resources/")) {
+                return false
+            }
+        }
+        def forgeBinMainPath = forgeBinMain.toPath().toAbsolutePath().normalize()
+        if (path == forgeBinMainPath || path.startsWith(forgeBinMainPath)) {
+            return false
+        }
+        return true
     }
 
     ["runClient", "runServer"].each { runTask ->
         tasks.named(runTask).configure {
-            classpath = classpath.filter(stripCommonDevJar)
+            classpath = classpath.filter(keepOnForgeClasspath)
         }
     }
 }

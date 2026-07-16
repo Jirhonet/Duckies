@@ -6,30 +6,23 @@ import com.mojang.math.Axis;
 import net.jirho.duckies.client.renderer.DuckRenderState;
 import net.jirho.duckies.client.renderer.model.DuckModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
 
 public class DuckHeldItemLayer extends RenderLayer<DuckRenderState, DuckModel> {
     private static final float BLOCKBENCH_ENTITY_HEIGHT = 24.0F;
 
-    private final ItemRenderer itemRenderer;
-
-    public DuckHeldItemLayer(RenderLayerParent<DuckRenderState, DuckModel> renderer, ItemRenderer itemRenderer) {
+    public DuckHeldItemLayer(RenderLayerParent<DuckRenderState, DuckModel> renderer) {
         super(renderer);
-        this.itemRenderer = itemRenderer;
     }
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, DuckRenderState state,
             float yRot, float xRot) {
-        ItemStack itemStack = state.getMainHandItem();
-        BakedModel itemModel = state.getMainHandItemModel();
-        if (itemStack.isEmpty() || itemModel == null) {
+        ItemStackRenderState heldItem = state.heldItem;
+        if (heldItem.isEmpty()) {
             return;
         }
 
@@ -45,8 +38,7 @@ public class DuckHeldItemLayer extends RenderLayer<DuckRenderState, DuckModel> {
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
 
-        this.itemRenderer.render(itemStack, ItemDisplayContext.GROUND, false, poseStack, buffer, packedLight,
-                OverlayTexture.NO_OVERLAY, itemModel);
+        heldItem.render(poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 }

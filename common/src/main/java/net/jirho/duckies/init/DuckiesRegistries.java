@@ -62,7 +62,7 @@ public final class DuckiesRegistries {
                     .build(DUCK_ENTITY_KEY));
 
     public static final RegistrySupplier<Item> DUCK_SPAWN_EGG = ITEMS.register("duck_spawn_egg", () ->
-            new ArchitecturySpawnEggItem(DUCK, 15387438, 15557653, new Item.Properties()
+            new ArchitecturySpawnEggItem(DUCK, new Item.Properties()
                     .setId(DUCK_SPAWN_EGG_KEY)
                     .arch$tab(CreativeModeTabs.SPAWN_EGGS)));
 

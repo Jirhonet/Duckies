@@ -7,6 +7,7 @@ import net.jirho.duckies.client.renderer.model.DuckModel;
 import net.jirho.duckies.common.entity.Duck;
 import net.minecraft.client.renderer.entity.AgeableMobRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.state.HoldingEntityRenderState;
 import net.minecraft.resources.ResourceLocation;
 
 public class DuckRenderer extends AgeableMobRenderer<Duck, DuckRenderState, DuckModel> {
@@ -17,7 +18,7 @@ public class DuckRenderer extends AgeableMobRenderer<Duck, DuckRenderState, Duck
                 new DuckModel(context.bakeLayer(DuckModel.BABY_LAYER_LOCATION)), 0.3F);
         this.addLayer(new DuckAngryLayer(this));
         this.addLayer(new DuckColorLayer(this));
-        this.addLayer(new DuckHeldItemLayer(this, context.getItemRenderer()));
+        this.addLayer(new DuckHeldItemLayer(this));
     }
 
     @Override
@@ -33,6 +34,7 @@ public class DuckRenderer extends AgeableMobRenderer<Duck, DuckRenderState, Duck
     @Override
     public void extractRenderState(Duck duck, DuckRenderState state, float partialTick) {
         super.extractRenderState(duck, state, partialTick);
+        HoldingEntityRenderState.extractHoldingEntityRenderState(duck, state, this.itemModelResolver);
         state.isSitting = duck.isInSittingPose();
         state.onGround = duck.onGround();
         state.isAngry = duck.isAngry();

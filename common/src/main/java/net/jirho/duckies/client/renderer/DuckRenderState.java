@@ -1,9 +1,9 @@
 package net.jirho.duckies.client.renderer;
 
-import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.entity.state.HoldingEntityRenderState;
 import net.minecraft.world.item.DyeColor;
 
-public class DuckRenderState extends LivingEntityRenderState {
+public class DuckRenderState extends HoldingEntityRenderState {
     public boolean isSitting;
     public boolean onGround;
     public boolean isAngry;

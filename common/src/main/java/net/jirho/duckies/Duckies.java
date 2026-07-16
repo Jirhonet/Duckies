@@ -17,6 +17,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 public final class Duckies {
     public static final String MOD_ID = "duckies";
+    private static final ResourceLocation RIVER = ResourceLocation.parse("minecraft:river");
 
     private Duckies() {
     }
@@ -30,21 +31,18 @@ public final class Duckies {
                     DuckiesRegistries.DUCK.get(),
                     SpawnPlacementTypes.ON_GROUND,
                     Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                    Duck::canSpawn
-            );
+                    Duck::canSpawn);
         });
 
         if (!Platform.isNeoForge()) {
-            BiomeModifications.addProperties(
-                    (ctx, mutable) -> {
-                        if (ctx.getKey().map(key -> key.equals(new ResourceLocation("minecraft:river"))).orElse(false)) {
-                            mutable.getSpawnProperties().addSpawn(
-                                    net.minecraft.world.entity.MobCategory.CREATURE,
-                                    new MobSpawnSettings.SpawnerData(DuckiesRegistries.DUCK.get(), 20, 2, 7)
-                            );
-                        }
-                    }
-            );
+            // BiomeContext.getKey() is a ResourceLocation, not a ResourceKey.
+            BiomeModifications.addProperties((ctx, mutable) -> {
+                if (ctx.getKey().map(RIVER::equals).orElse(false)) {
+                    mutable.getSpawnProperties().addSpawn(
+                            net.minecraft.world.entity.MobCategory.CREATURE,
+                            new MobSpawnSettings.SpawnerData(DuckiesRegistries.DUCK.get(), 20, 2, 7));
+                }
+            });
         }
 
         EnvExecutor.runInEnv(Env.CLIENT, () -> DuckiesClient::init);

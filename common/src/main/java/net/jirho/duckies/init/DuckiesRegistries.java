@@ -45,22 +45,22 @@ public final class DuckiesRegistries {
     public static final RegistrySupplier<EntityType<Duck>> DUCK = ENTITIES.register("duck", () ->
             EntityType.Builder.of(Duck::new, MobCategory.CREATURE)
                     .sized(0.4F, 0.4F)
-                    .build(new ResourceLocation(Duckies.MOD_ID, "duck").toString()));
+                    .build(ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "duck").toString()));
 
     public static final RegistrySupplier<Item> DUCK_SPAWN_EGG = ITEMS.register("duck_spawn_egg", () ->
             new ArchitecturySpawnEggItem(DUCK, 15387438, 15557653, new Item.Properties().arch$tab(CreativeModeTabs.SPAWN_EGGS)));
 
     public static final RegistrySupplier<SoundEvent> DUCK_AMBIENT = SOUNDS.register("entity.duck.ambient", () ->
-            SoundEvent.createVariableRangeEvent(new ResourceLocation(Duckies.MOD_ID, "entity.duck.ambient")));
+            SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "entity.duck.ambient")));
 
     public static final RegistrySupplier<SoundEvent> DUCK_HURT = SOUNDS.register("entity.duck.hurt", () ->
-            SoundEvent.createVariableRangeEvent(new ResourceLocation(Duckies.MOD_ID, "entity.duck.hurt")));
+            SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "entity.duck.hurt")));
 
     public static final RegistrySupplier<SoundEvent> DUCK_DEATH = SOUNDS.register("entity.duck.death", () ->
-            SoundEvent.createVariableRangeEvent(new ResourceLocation(Duckies.MOD_ID, "entity.duck.death")));
+            SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "entity.duck.death")));
 
     public static final RegistrySupplier<SoundEvent> DUCK_ATTACK = SOUNDS.register("entity.duck.attack", () ->
-            SoundEvent.createVariableRangeEvent(new ResourceLocation(Duckies.MOD_ID, "entity.duck.attack")));
+            SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "entity.duck.attack")));
 
     public static final RegistrySupplier<Feature<NoneFeatureConfiguration>> DUCKWEED_FEATURE = FEATURES.register("duckweed", DuckweedFeature::new);
 

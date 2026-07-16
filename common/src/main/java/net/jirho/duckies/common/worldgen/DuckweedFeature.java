@@ -19,13 +19,13 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 public class DuckweedFeature extends Feature<NoneFeatureConfiguration> {
     private static final ResourceKey<Biome> RIVER = ResourceKey.create(
             Registries.BIOME,
-            new ResourceLocation("minecraft:river"));
+            ResourceLocation.parse("minecraft:river"));
     private static final ResourceKey<Biome> SWAMP = ResourceKey.create(
             Registries.BIOME,
-            new ResourceLocation("minecraft:swamp"));
+            ResourceLocation.parse("minecraft:swamp"));
     private static final ResourceKey<Biome> MANGROVE_SWAMP = ResourceKey.create(
             Registries.BIOME,
-            new ResourceLocation("minecraft:mangrove_swamp"));
+            ResourceLocation.parse("minecraft:mangrove_swamp"));
     private static final int MAX_SHORE_DISTANCE = 8;
     private static final int RIVER_SURFACE_SEARCH_RANGE = 4;
     private static final int RIVER_PATCH_SPREAD = 5;

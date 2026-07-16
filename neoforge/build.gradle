@@ -32,6 +32,13 @@ dependencies {
 processResources {
     inputs.property "version", project.version
 
+    // NeoForge devenv only packs this module's resource roots as the duckies ModFile.
+    // Common datapacks/assets must be copied here or advancements/loot/tags never load.
+    def commonResources = project(":common").sourceSets.main.resources
+    inputs.files(commonResources).withPropertyName("commonResources")
+    from commonResources
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     filesMatching("META-INF/neoforge.mods.toml") {
         expand "version": project.version
     }

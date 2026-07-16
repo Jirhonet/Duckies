@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 
 public class DuckAngryLayer extends RenderLayer<Duck, DuckModel<Duck>> {
-    private static final ResourceLocation ANGRY_TEXTURE = new ResourceLocation("duckies",
+    private static final ResourceLocation ANGRY_TEXTURE = ResourceLocation.fromNamespaceAndPath("duckies",
             "textures/entity/duck_angry.png");
 
     public DuckAngryLayer(RenderLayerParent<Duck, DuckModel<Duck>> renderer) {
@@ -25,6 +25,6 @@ public class DuckAngryLayer extends RenderLayer<Duck, DuckModel<Duck>> {
         }
 
         RenderLayer.renderColoredCutoutModel(this.getParentModel(), ANGRY_TEXTURE, poseStack, buffer, packedLight, duck,
-                1.0F, 1.0F, 1.0F);
+                -1);
     }
 }

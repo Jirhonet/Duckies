@@ -15,20 +15,20 @@ A mod that adds ducks and stuff.
 [[dependencies.duckies]]
 modId = "neoforge"
 type = "required"
-versionRange = "[20.6,)"
+versionRange = "[21.1,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.duckies]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.20.6,)"
+versionRange = "[1.21.1,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.duckies]]
 modId = "architectury"
 type = "required"
-versionRange = "[12.1.4,)"
+versionRange = "[13.0.8,)"
 ordering = "AFTER"
 side = "BOTH"

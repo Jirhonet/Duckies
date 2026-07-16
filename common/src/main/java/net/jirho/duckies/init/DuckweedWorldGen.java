@@ -12,10 +12,13 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 public final class DuckweedWorldGen {
     private static final ResourceKey<PlacedFeature> DUCKWEED_RIVER = ResourceKey.create(
             Registries.PLACED_FEATURE,
-            new ResourceLocation(Duckies.MOD_ID, "duckweed_river"));
+            ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "duckweed_river"));
     private static final ResourceKey<PlacedFeature> DUCKWEED_SWAMP = ResourceKey.create(
             Registries.PLACED_FEATURE,
-            new ResourceLocation(Duckies.MOD_ID, "duckweed_swamp"));
+            ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "duckweed_swamp"));
+    private static final ResourceLocation RIVER = ResourceLocation.parse("minecraft:river");
+    private static final ResourceLocation SWAMP = ResourceLocation.parse("minecraft:swamp");
+    private static final ResourceLocation MANGROVE_SWAMP = ResourceLocation.parse("minecraft:mangrove_swamp");
 
     private DuckweedWorldGen() {
     }
@@ -27,17 +30,14 @@ public final class DuckweedWorldGen {
 
         BiomeModifications.addProperties((ctx, mutable) -> {
             ctx.getKey().ifPresent(key -> {
-                if (key.equals(new ResourceLocation("minecraft:river"))) {
+                if (key.equals(RIVER)) {
                     mutable.getGenerationProperties().addFeature(
                             GenerationStep.Decoration.VEGETAL_DECORATION,
-                            DUCKWEED_RIVER
-                    );
-                } else if (key.equals(new ResourceLocation("minecraft:swamp"))
-                        || key.equals(new ResourceLocation("minecraft:mangrove_swamp"))) {
+                            DUCKWEED_RIVER);
+                } else if (key.equals(SWAMP) || key.equals(MANGROVE_SWAMP)) {
                     mutable.getGenerationProperties().addFeature(
                             GenerationStep.Decoration.VEGETAL_DECORATION,
-                            DUCKWEED_SWAMP
-                    );
+                            DUCKWEED_SWAMP);
                 }
             });
         });

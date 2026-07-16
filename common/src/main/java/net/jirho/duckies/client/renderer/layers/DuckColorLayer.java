@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 
 public class DuckColorLayer extends RenderLayer<Duck, DuckModel<Duck>> {
-    private static final ResourceLocation COLOR_TEXTURE = new ResourceLocation("duckies",
+    private static final ResourceLocation COLOR_TEXTURE = ResourceLocation.fromNamespaceAndPath("duckies",
             "textures/entity/duck_color.png");
 
     public DuckColorLayer(RenderLayerParent<Duck, DuckModel<Duck>> renderer) {
@@ -24,9 +24,8 @@ public class DuckColorLayer extends RenderLayer<Duck, DuckModel<Duck>> {
             return;
         }
 
-        float[] colors = duck.getColor().getTextureDiffuseColors();
+        int color = duck.getColor().getTextureDiffuseColor();
         RenderLayer.renderColoredCutoutModel(this.getParentModel(), COLOR_TEXTURE, poseStack, buffer, packedLight,
-                duck,
-                colors[0], colors[1], colors[2]);
+                duck, color);
     }
 }

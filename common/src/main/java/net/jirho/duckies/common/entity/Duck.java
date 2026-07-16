@@ -1,5 +1,6 @@
 package net.jirho.duckies.common.entity;
 
+import java.util.List;
 import java.util.UUID;
 
 import net.jirho.duckies.common.advancement.DuckiesAdvancements;
@@ -63,9 +64,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -98,7 +98,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new DuckSwimGoal(this));
-        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F));
         this.goalSelector.addGoal(4, new BreedGoal(this, 1.0D));
         this.goalSelector.addGoal(5, new MeleeAttackGoal(this, 1.0D, true));
         this.goalSelector.addGoal(6, new LeapAtTargetGoal(this, 0.4F));
@@ -189,7 +189,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
 
     @Override
     public boolean canTakeItem(ItemStack stack) {
-        EquipmentSlot slot = Mob.getEquipmentSlotForItem(stack);
+        EquipmentSlot slot = this.getEquipmentSlotForItem(stack);
         if (slot != EquipmentSlot.MAINHAND || !super.canTakeItem(stack)) {
             return false;
         }
@@ -522,7 +522,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
     private DyeColor getOffspringColor(Duck otherParent) {
         DyeColor parentColor = this.getColor();
         DyeColor otherColor = otherParent.getColor();
-        TransientCraftingContainer container = makeDyeContainer(parentColor, otherColor);
+        CraftingInput container = makeDyeContainer(parentColor, otherColor);
         return this.level().getRecipeManager()
                 .getRecipeFor(RecipeType.CRAFTING, container, this.level())
                 .map(recipe -> recipe.value().assemble(container, this.level().registryAccess()))
@@ -533,21 +533,10 @@ public class Duck extends TamableAnimal implements NeutralMob {
                 .orElseGet(() -> this.random.nextBoolean() ? parentColor : otherColor);
     }
 
-    private static TransientCraftingContainer makeDyeContainer(DyeColor first, DyeColor second) {
-        TransientCraftingContainer container = new TransientCraftingContainer(new AbstractContainerMenu(null, -1) {
-            @Override
-            public ItemStack quickMoveStack(Player player, int slot) {
-                return ItemStack.EMPTY;
-            }
-
-            @Override
-            public boolean stillValid(Player player) {
-                return false;
-            }
-        }, 2, 1);
-        container.setItem(0, new ItemStack(DyeItem.byColor(first)));
-        container.setItem(1, new ItemStack(DyeItem.byColor(second)));
-        return container;
+    private static CraftingInput makeDyeContainer(DyeColor first, DyeColor second) {
+        return CraftingInput.of(2, 1, List.of(
+                new ItemStack(DyeItem.byColor(first)),
+                new ItemStack(DyeItem.byColor(second))));
     }
 
     @Override
@@ -581,7 +570,7 @@ public class Duck extends TamableAnimal implements NeutralMob {
 
     @Override
     public ResourceKey<LootTable> getDefaultLootTable() {
-        return ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation("duckies", "entities/duck"));
+        return ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("duckies", "entities/duck"));
     }
 
     @Override

@@ -7,7 +7,7 @@ import net.minecraft.world.item.Item;
 
 public final class DuckiesTags {
     public static final TagKey<Item> DUCK_EDIBLE = TagKey.create(Registries.ITEM,
-            new ResourceLocation("duckies", "duck_edible"));
+            ResourceLocation.fromNamespaceAndPath("duckies", "duck_edible"));
 
     private DuckiesTags() {
     }

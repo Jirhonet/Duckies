@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 
 public class DuckRenderer extends MobRenderer<Duck, DuckModel<Duck>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation("duckies", "textures/entity/duck.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("duckies", "textures/entity/duck.png");
 
     public DuckRenderer(EntityRendererProvider.Context context) {
         super(context, new DuckModel<>(context.bakeLayer(DuckModel.LAYER_LOCATION)), 0.3F);

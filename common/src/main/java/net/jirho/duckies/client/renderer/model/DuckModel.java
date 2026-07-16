@@ -18,7 +18,7 @@ import net.minecraft.world.entity.TamableAnimal;
 
 public class DuckModel<T extends Duck> extends AgeableListModel<T> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
-            new ResourceLocation("duckies", "duck"), "main");
+            ResourceLocation.fromNamespaceAndPath("duckies", "duck"), "main");
     public static final float BABY_HEAD_SCALE = 2.0F;
     public static final float BABY_Y_HEAD_OFFSET = 9.7F;
     public static final float BABY_Z_HEAD_OFFSET = 1.0F;

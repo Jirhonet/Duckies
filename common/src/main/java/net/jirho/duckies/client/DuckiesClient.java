@@ -21,6 +21,7 @@ public final class DuckiesClient {
 
     public static void init() {
         EntityModelLayerRegistry.register(DuckModel.LAYER_LOCATION, DuckModel::createBodyLayer);
+        EntityModelLayerRegistry.register(DuckModel.BABY_LAYER_LOCATION, DuckModel::createBabyBodyLayer);
         EntityRendererRegistry.register(DuckiesRegistries.DUCK, DuckRenderer::new);
         ClientLifecycleEvent.CLIENT_SETUP.register(minecraft ->
                 RenderTypeRegistry.register(RenderType.cutout(), DuckiesRegistries.DUCKWEED.get()));

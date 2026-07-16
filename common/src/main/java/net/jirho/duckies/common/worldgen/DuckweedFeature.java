@@ -154,7 +154,7 @@ public class DuckweedFeature extends Feature<NoneFeatureConfiguration> {
                 break;
             }
 
-            if (state.isSolidRender(level, check)) {
+            if (state.isSolidRender()) {
                 return true;
             }
         }

@@ -9,6 +9,7 @@ import net.jirho.duckies.common.block.DuckweedBlock;
 import net.jirho.duckies.common.item.DuckweedBlockItem;
 import net.jirho.duckies.common.entity.Duck;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
@@ -31,24 +32,39 @@ public final class DuckiesRegistries {
     public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(Duckies.MOD_ID, Registries.SOUND_EVENT);
     public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(Duckies.MOD_ID, Registries.FEATURE);
 
+    private static final ResourceKey<Block> DUCKWEED_BLOCK_KEY = ResourceKey.create(Registries.BLOCK,
+            ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "duckweed"));
+    private static final ResourceKey<Item> DUCKWEED_ITEM_KEY = ResourceKey.create(Registries.ITEM,
+            ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "duckweed"));
+    private static final ResourceKey<Item> DUCK_SPAWN_EGG_KEY = ResourceKey.create(Registries.ITEM,
+            ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "duck_spawn_egg"));
+    private static final ResourceKey<EntityType<?>> DUCK_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "duck"));
+
     public static final RegistrySupplier<Block> DUCKWEED = BLOCKS.register("duckweed", () ->
             new DuckweedBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.PLANT)
                     .pushReaction(PushReaction.DESTROY)
                     .noCollission()
                     .instabreak()
-                    .sound(SoundType.GRASS)));
+                    .sound(SoundType.GRASS)
+                    .setId(DUCKWEED_BLOCK_KEY)));
 
     public static final RegistrySupplier<Item> DUCKWEED_ITEM = ITEMS.register("duckweed", () ->
-            new DuckweedBlockItem(DUCKWEED.get(), new Item.Properties().arch$tab(CreativeModeTabs.NATURAL_BLOCKS)));
+            new DuckweedBlockItem(DUCKWEED.get(), new Item.Properties()
+                    .useBlockDescriptionPrefix()
+                    .setId(DUCKWEED_ITEM_KEY)
+                    .arch$tab(CreativeModeTabs.NATURAL_BLOCKS)));
 
     public static final RegistrySupplier<EntityType<Duck>> DUCK = ENTITIES.register("duck", () ->
             EntityType.Builder.of(Duck::new, MobCategory.CREATURE)
                     .sized(0.4F, 0.4F)
-                    .build(ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "duck").toString()));
+                    .build(DUCK_ENTITY_KEY));
 
     public static final RegistrySupplier<Item> DUCK_SPAWN_EGG = ITEMS.register("duck_spawn_egg", () ->
-            new ArchitecturySpawnEggItem(DUCK, 15387438, 15557653, new Item.Properties().arch$tab(CreativeModeTabs.SPAWN_EGGS)));
+            new ArchitecturySpawnEggItem(DUCK, 15387438, 15557653, new Item.Properties()
+                    .setId(DUCK_SPAWN_EGG_KEY)
+                    .arch$tab(CreativeModeTabs.SPAWN_EGGS)));
 
     public static final RegistrySupplier<SoundEvent> DUCK_AMBIENT = SOUNDS.register("entity.duck.ambient", () ->
             SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Duckies.MOD_ID, "entity.duck.ambient")));

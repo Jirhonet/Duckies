@@ -2,30 +2,30 @@ package net.jirho.duckies.client.renderer.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.jirho.duckies.client.renderer.DuckRenderState;
 import net.jirho.duckies.client.renderer.model.DuckModel;
-import net.jirho.duckies.common.entity.Duck;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 
-public class DuckColorLayer extends RenderLayer<Duck, DuckModel<Duck>> {
+public class DuckColorLayer extends RenderLayer<DuckRenderState, DuckModel> {
     private static final ResourceLocation COLOR_TEXTURE = ResourceLocation.fromNamespaceAndPath("duckies",
             "textures/entity/duck_color.png");
 
-    public DuckColorLayer(RenderLayerParent<Duck, DuckModel<Duck>> renderer) {
+    public DuckColorLayer(RenderLayerParent<DuckRenderState, DuckModel> renderer) {
         super(renderer);
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Duck duck, float limbSwing,
-            float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (duck.isInvisible() || !duck.isTame()) {
+    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, DuckRenderState state,
+            float yRot, float xRot) {
+        if (state.isInvisible || !state.isTame) {
             return;
         }
 
-        int color = duck.getColor().getTextureDiffuseColor();
+        int color = state.collarColor.getTextureDiffuseColor();
         RenderLayer.renderColoredCutoutModel(this.getParentModel(), COLOR_TEXTURE, poseStack, buffer, packedLight,
-                duck, color);
+                state, color);
     }
 }

@@ -3,42 +3,39 @@ package net.jirho.duckies.client.renderer.layers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
+import net.jirho.duckies.client.renderer.DuckRenderState;
 import net.jirho.duckies.client.renderer.model.DuckModel;
-import net.jirho.duckies.common.entity.Duck;
-import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
-public class DuckHeldItemLayer extends RenderLayer<Duck, DuckModel<Duck>> {
+public class DuckHeldItemLayer extends RenderLayer<DuckRenderState, DuckModel> {
     private static final float BLOCKBENCH_ENTITY_HEIGHT = 24.0F;
 
-    private final ItemInHandRenderer itemInHandRenderer;
+    private final ItemRenderer itemRenderer;
 
-    public DuckHeldItemLayer(RenderLayerParent<Duck, DuckModel<Duck>> renderer, ItemInHandRenderer itemInHandRenderer) {
+    public DuckHeldItemLayer(RenderLayerParent<DuckRenderState, DuckModel> renderer, ItemRenderer itemRenderer) {
         super(renderer);
-        this.itemInHandRenderer = itemInHandRenderer;
+        this.itemRenderer = itemRenderer;
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Duck duck, float limbSwing,
-            float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        ItemStack itemStack = duck.getItemBySlot(EquipmentSlot.MAINHAND);
-        if (itemStack.isEmpty()) {
+    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, DuckRenderState state,
+            float yRot, float xRot) {
+        ItemStack itemStack = state.getMainHandItem();
+        BakedModel itemModel = state.getMainHandItemModel();
+        if (itemStack.isEmpty() || itemModel == null) {
             return;
         }
 
         poseStack.pushPose();
-        if (duck.isBaby()) {
-            float headScale = 1.5F / DuckModel.BABY_HEAD_SCALE;
-            poseStack.scale(headScale, headScale, headScale);
-            poseStack.translate(0.0F, DuckModel.BABY_Y_HEAD_OFFSET / 16.0F, DuckModel.BABY_Z_HEAD_OFFSET / 16.0F);
-        }
 
-        DuckModel<Duck> model = this.getParentModel();
+        DuckModel model = this.getParentModel();
         float heldItemY = BLOCKBENCH_ENTITY_HEIGHT - model.heldItem.y;
         model.head.translateAndRotate(poseStack);
         poseStack.translate(
@@ -48,8 +45,8 @@ public class DuckHeldItemLayer extends RenderLayer<Duck, DuckModel<Duck>> {
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
 
-        this.itemInHandRenderer.renderItem(duck, itemStack, ItemDisplayContext.GROUND, false, poseStack,
-                buffer, packedLight);
+        this.itemRenderer.render(itemStack, ItemDisplayContext.GROUND, false, poseStack, buffer, packedLight,
+                OverlayTexture.NO_OVERLAY, itemModel);
         poseStack.popPose();
     }
 }

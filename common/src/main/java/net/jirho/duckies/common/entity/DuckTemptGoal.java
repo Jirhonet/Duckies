@@ -1,12 +1,14 @@
 package net.jirho.duckies.common.entity;
 
+import java.util.function.Predicate;
+
 import net.minecraft.world.entity.ai.goal.TemptGoal;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.ItemStack;
 
 public class DuckTemptGoal extends TemptGoal {
     private final Duck duck;
 
-    public DuckTemptGoal(Duck duck, double speed, Ingredient items, boolean canScare) {
+    public DuckTemptGoal(Duck duck, double speed, Predicate<ItemStack> items, boolean canScare) {
         super(duck, speed, items, canScare);
         this.duck = duck;
     }

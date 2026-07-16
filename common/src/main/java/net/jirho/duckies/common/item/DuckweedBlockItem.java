@@ -6,9 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
@@ -29,15 +27,15 @@ public class DuckweedBlockItem extends PlaceOnWaterBlockItem {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         BlockHitResult hit = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
         if (hit.getType() != HitResult.Type.BLOCK || !level.getFluidState(hit.getBlockPos()).is(FluidTags.WATER)) {
-            return InteractionResultHolder.pass(player.getItemInHand(hand));
+            return InteractionResult.PASS;
         }
 
         BlockPos surface = DuckweedBlock.findWaterColumnSurface(level, hit.getBlockPos());
         if (surface == null) {
-            return InteractionResultHolder.pass(player.getItemInHand(hand));
+            return InteractionResult.PASS;
         }
 
         BlockHitResult adjusted = new BlockHitResult(
@@ -45,8 +43,7 @@ public class DuckweedBlockItem extends PlaceOnWaterBlockItem {
                 Direction.DOWN,
                 surface.above(),
                 false);
-        InteractionResult result = this.useOn(new UseOnContext(player, hand, adjusted));
-        return new InteractionResultHolder<>(result, player.getItemInHand(hand));
+        return this.useOn(new UseOnContext(player, hand, adjusted));
     }
 
     @Override

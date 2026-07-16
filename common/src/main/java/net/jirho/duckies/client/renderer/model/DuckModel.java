@@ -1,9 +1,10 @@
 package net.jirho.duckies.client.renderer.model;
 
-import com.google.common.collect.ImmutableList;
+import java.util.Set;
 
-import net.jirho.duckies.common.entity.Duck;
-import net.minecraft.client.model.AgeableListModel;
+import net.jirho.duckies.client.renderer.DuckRenderState;
+import net.minecraft.client.model.BabyModelTransform;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -11,17 +12,21 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.TamableAnimal;
 
-public class DuckModel<T extends Duck> extends AgeableListModel<T> {
+public class DuckModel extends EntityModel<DuckRenderState> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
             ResourceLocation.fromNamespaceAndPath("duckies", "duck"), "main");
+    public static final ModelLayerLocation BABY_LAYER_LOCATION = new ModelLayerLocation(
+            ResourceLocation.fromNamespaceAndPath("duckies", "duck_baby"), "main");
     public static final float BABY_HEAD_SCALE = 2.0F;
     public static final float BABY_Y_HEAD_OFFSET = 9.7F;
     public static final float BABY_Z_HEAD_OFFSET = 1.0F;
+    public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(
+            true, BABY_Y_HEAD_OFFSET, BABY_Z_HEAD_OFFSET, BABY_HEAD_SCALE, 2.0F, 24.0F, Set.of("head", "held_item"));
     private static final float FALLING_FOOT_SWING_SPEED = 1.75F;
 
     public final ModelPart head;
@@ -32,7 +37,7 @@ public class DuckModel<T extends Duck> extends AgeableListModel<T> {
     private final ModelPart rightFoot;
 
     public DuckModel(ModelPart root) {
-        super(true, BABY_Y_HEAD_OFFSET, BABY_Z_HEAD_OFFSET, BABY_HEAD_SCALE, 2.0F, 24.0F);
+        super(root);
         this.head = root.getChild("head");
         this.heldItem = root.getChild("held_item");
         this.body = root.getChild("body");
@@ -65,53 +70,36 @@ public class DuckModel<T extends Duck> extends AgeableListModel<T> {
         return LayerDefinition.create(meshDefinition, 32, 32);
     }
 
-    @Override
-    protected Iterable<ModelPart> headParts() {
-        return ImmutableList.of(this.head);
+    public static LayerDefinition createBabyBodyLayer() {
+        return createBodyLayer().apply(BABY_TRANSFORMER);
     }
 
     @Override
-    protected Iterable<ModelPart> bodyParts() {
-        return ImmutableList.of(this.body, this.feet);
-    }
+    public void setupAnim(DuckRenderState state) {
+        // resetPose restores baked adult/baby part poses; do not overwrite with adult coordinates.
+        super.setupAnim(state);
 
-    @Override
-    public void prepareMobModel(T arg, float f, float g, float h) {
-        if (((TamableAnimal) arg).isInSittingPose()) {
-            this.body.setPos(0.0F, 22.0F, 0.0F);
-            this.feet.setPos(0.0F, 24.0F, 0.5F);
-            this.head.setPos(0.0F, 20.0F, -2.5F);
-            this.heldItem.setPos(0.0F, 4.5F, -5.0F);
-        } else {
-            this.body.setPos(0.0F, 21.0F, 0.0F);
-            this.feet.setPos(0.0F, 23.0F, 0.5F);
-            this.head.setPos(0.0F, 19.0F, -2.5F);
-            this.heldItem.setPos(0.0F, 5.5F, -5.0F);
+        if (state.isSitting) {
+            this.body.y += 1.0F;
+            this.feet.y += 1.0F;
+            this.head.y += 1.0F;
+            this.heldItem.y -= 1.0F;
         }
-    }
 
-    @Override
-    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw,
-            float headPitch) {
-        this.head.xRot = headPitch * ((float) Math.PI / 180F);
-        this.head.yRot = netHeadYaw * ((float) Math.PI / 180F);
+        this.head.xRot = state.xRot * ((float) Math.PI / 180F);
+        this.head.yRot = state.yRot * ((float) Math.PI / 180F);
 
         float footSwing;
         float footSwingAmount;
-        if (this.isFalling(entity)) {
-            footSwing = ageInTicks * FALLING_FOOT_SWING_SPEED;
+        if (!state.onGround && !state.isSitting) {
+            footSwing = state.ageInTicks * FALLING_FOOT_SWING_SPEED;
             footSwingAmount = 1.0F;
         } else {
-            footSwing = limbSwing;
-            footSwingAmount = limbSwingAmount;
+            footSwing = state.walkAnimationPos;
+            footSwingAmount = state.walkAnimationSpeed;
         }
 
         this.leftFoot.xRot = Mth.cos(footSwing * 0.6662F) * 1.4F * footSwingAmount;
         this.rightFoot.xRot = Mth.cos(footSwing * 0.6662F + (float) Math.PI) * 1.4F * footSwingAmount;
-    }
-
-    private boolean isFalling(T entity) {
-        return !entity.onGround()
-                && !entity.isInSittingPose();
     }
 }
